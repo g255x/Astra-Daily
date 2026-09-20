@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "astra",
+  "version": "V1.3.1",
+  "name": "Astra Client",
+  "description": "Astra Client (_Kushen_写的客户端)",
+  "authors": [
+    "_Kushen_"
+  ],
+  "accessWidener": "astra.accesswidener",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.Astra.Astra"
+    ]
+  },
+  "mixins": [
+    "astra.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "\u003e\u003d0.15.0",
+    "minecraft": "1.21.1",
+    "java": "\u003e\u003d17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  },
+  "jars": [
+    {
+      "file": "META-INF/jars/IAS-Fabric-1.21.1-9.0.2.jar"
+    },
+    {
+      "file": "META-INF/jars/satin-2.0.0.jar"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+package dev.luminous.mod.modules.impl.misc;
+
+import dev.luminous.Alien;
+import dev.luminous.api.events.eventbus.EventListener;
+import dev.luminous.api.events.impl.DeathEvent;
+import dev.luminous.mod.modules.Module;
+import dev.luminous.mod.modules.settings.impl.EnumSetting;
+import dev.luminous.mod.modules.settings.impl.SliderSetting;
+import dev.luminous.mod.modules.settings.impl.StringSetting;
+import java.util.List;
+import java.util.Random;
+import net.minecraft.class_1657;
+import net.minecraft.class_634;
+
+public class AutoEZ extends Module {
+   private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+   public final List<String> sex = List.of("呐呐~杂鱼哥哥不会这样就被捉弄的不会说话了吧♡", "嘻嘻~杂鱼哥哥不会以为竖个大拇哥就能欺负我了吧~不会吧♡不会吧♡", "杂鱼哥哥怎么可能欺负得了别人呢~只能欺负自己哦♡~", "哥哥真是好欺负啊♡嘻嘻~", "哎♡~杂鱼说话就是无趣唉~", "呐呐~杂鱼哥哥发这个是想教育我吗~嘻嘻~怎么可能啊♡", "什么嘛~废柴哥哥会想这种事情啊~唔呃", "把你肮脏的目光拿开啦~很恶心哦♡", "咱的期待就是被你这样的笨蛋破坏了~♡");
+   public final List<String> bot = List.of("鼠标明天到，触摸板打的", "转人工", "收徒", "不收徒", "有真人吗", "墨镜上车", "素材局", "不接单", "接单", "征婚", "4399?", "暂时不考虑打职业", "bot?", "叫你家大人来打", "假肢上门安装", "浪费我的网费", "不收残疾人", "下课", "自己找差距", "不接代", "代+", "这样的治好了也流口水", "人机", "人机怎么调难度啊", "只收不被0封的", "Bot吗这是", "领养", "纳亲", "正视差距", "近亲繁殖?", "我玩的是新手教程?", "来调灵敏度的", "来调参数的", "小号", "不是本人别加", "下次记得晚点玩", "随便玩玩,不带妹", "扣1上车");
+   private final EnumSetting<Type> type;
+   final StringSetting message;
+   final Random random;
+   private final SliderSetting range;
+   private final SliderSetting randoms;
+
+   public AutoEZ() {
+      super("AutoEZ", Module.Category.Misc);
+      this.type = this.add(new EnumSetting("Type", AutoEZ.Type.Bot));
+      this.message = this.add(new StringSetting("Message", "EZ %player%", () -> this.type.getValue() == AutoEZ.Type.Custom));
+      this.random = new Random();
+      this.range = this.add(new SliderSetting("Range", (double)10.0F, (double)0.0F, (double)20.0F, 0.1));
+      this.randoms = this.add(new SliderSetting("Random", (double)3.0F, (double)0.0F, (double)20.0F, (double)1.0F));
+      this.setChinese("自动嘲讽");
+   }
+
+   @EventListener
+   public void onDeath(DeathEvent event) {
+      class_1657 player = event.getPlayer();
+      if (player != mc.field_1724 && !Alien.FRIEND.isFriend(player)) {
+         if (this.range.getValue() > (double)0.0F && (double)mc.field_1724.method_5739(player) > this.range.getValue()) {
+            return;
+         }
+
+         String randomString = this.generateRandomString(this.randoms.getValueInt());
+         if (!randomString.isEmpty()) {
+            randomString = " " + randomString;
+         }
+
+         switch (((Type)this.type.getValue()).ordinal()) {
+            case 0:
+               class_634 var5 = mc.method_1562();
+               String var7 = (String)this.bot.get(this.random.nextInt(this.bot.size() - 1));
+               var5.method_45729(var7 + " " + player.method_5477().getString() + randomString);
+               break;
+            case 1:
+               class_634 var4 = mc.method_1562();
+               String var6 = this.message.getValue().replaceAll("%player%", player.method_5477().getString());
+               var4.method_45729(var6 + randomString);
+               break;
+            case 2:
+               class_634 var10000 = mc.method_1562();
+               String var10001 = (String)this.sex.get(this.random.nextInt(this.sex.size() - 1));
+               var10000.method_45729(var10001 + " " + player.method_5477().getString() + randomString);
+         }
+      }
+
+   }
+
+   private String generateRandomString(int LENGTH) {
+      StringBuilder sb = new StringBuilder(LENGTH);
+
+      for(int i = 0; i < LENGTH; ++i) {
+         int index = this.random.nextInt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".length());
+         sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".charAt(index));
+      }
+
+      return sb.toString();
+   }
+
+   public static enum Type {
+      Bot,
+      Custom,
+      AutoSex;
+
+      // $FF: synthetic method
+      private static Type[] $values() {
+         return new Type[]{Bot, Custom, AutoSex};
+      }
+   }
+}

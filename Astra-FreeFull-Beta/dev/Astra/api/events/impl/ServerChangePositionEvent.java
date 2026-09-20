@@ -1,0 +1,5 @@
+package dev.Astra.api.events.impl;
+
+public class ServerChangePositionEvent {
+   public static final ServerChangePositionEvent INSTANCE = new ServerChangePositionEvent();
+}
