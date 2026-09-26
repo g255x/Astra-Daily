@@ -24,6 +24,7 @@ import dev.Astra.mod.modules.settings.impl.BooleanSetting;
 import dev.Astra.mod.modules.settings.impl.ColorSetting;
 import dev.Astra.mod.modules.settings.impl.EnumSetting;
 import dev.Astra.mod.modules.settings.impl.SliderSetting;
+import j2cc.Nativeify;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
@@ -372,7 +373,7 @@ public class Aura extends Module {
         }
         return !checkFov.getValue();
     }
-
+    @Nativeify
     public Entity getTarget(double range) {
         Entity target = null;
         double getDistance = range;

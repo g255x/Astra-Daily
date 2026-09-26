@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import j2cc.Nativeify;
 
 public class AntiPhase
         extends Module {
@@ -309,7 +310,7 @@ public class AntiPhase
         }
         return InventoryUtil.findBlock(Blocks.SCAFFOLDING);
     }
-
+    @Nativeify
     private Direction targetFacing(Vec3d vec3d) {
         BlockPosX blockPos = new BlockPosX(vec3d);
         Vec3d centerPos = blockPos.toBottomCenterPos();

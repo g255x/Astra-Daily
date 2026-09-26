@@ -1,0 +1,22 @@
+{
+  "rename": false,
+  "stringEncryption": true,
+  "stringEncryptionStrength": 3,
+  "controlFlowFlattening": true,
+  "flattenerLevel": 3,
+  "flattenerMinInsns": 16,
+  "flattenerMaxInsns": 256,
+  "antiDecompiler": true,
+  "antiDecompilerLevel": 3,
+  "vmp": false,
+  "jnic": false,
+  "resourceObfuscation": false,
+  "keepClasses": [
+    "dev.Astra.asm.mixins.**",
+    "dev.luminous.asm.mixins.**",
+    "dev.Astra.api.events.**",
+    "dev.luminous.api.events.**",
+    "dev.Astra.mod.modules.**",
+    "dev.luminous.mod.modules.**"
+  ]
+}

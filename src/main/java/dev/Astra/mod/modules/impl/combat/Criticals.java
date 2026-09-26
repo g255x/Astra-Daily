@@ -43,22 +43,24 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class Criticals extends Module {
     public static Criticals INSTANCE;
     public final EnumSetting<Mode> mode = this.add(new EnumSetting<Mode>("Mode", Mode.NCP));
-    public final BooleanSetting onlyGround = this.add(new BooleanSetting("OnlyGround", true, () -> !this.mode.is(Mode.Ground)));
+    public final BooleanSetting onlyGround = this.add(new BooleanSetting("OnlyGround", true, () -> !this.mode.is(Mode.Ground) && !this.mode.is(Mode.Freeze)));
     private final BooleanSetting setOnGround = this.add(new BooleanSetting("SetNoGround", false, () -> this.mode.is(Mode.Ground)));
     private final BooleanSetting blockCheck = this.add(new BooleanSetting("BlockCheck", true, () -> this.mode.is(Mode.Ground)));
     private final BooleanSetting autoJump = this.add(new BooleanSetting("AutoJump", true, () -> this.mode.is(Mode.Ground)).setParent());
     private final BooleanSetting mini = this.add(new BooleanSetting("Mini", true, () -> this.mode.is(Mode.Ground) && this.autoJump.isOpen()));
     private final SliderSetting y = this.add(new SliderSetting("MotionY", 0.05, 0.0, 1.0, 0.001, () -> this.mode.is(Mode.Ground) && this.autoJump.isOpen()).setSuffix("blocks"));
     private final BooleanSetting flight = this.add(new BooleanSetting("Flight", false, () -> this.mode.is(Mode.Ground)));
+    private final SliderSetting freezeDelay = this.add(new SliderSetting("FreezeDelay", 10.0, 0.0, 500.0, 1.0, () -> this.mode.is(Mode.Freeze)).setSuffix("ms"));
 
     // 所有模式通用设置
     private final BooleanSetting pauseOnMove = this.add(new BooleanSetting("PauseOnMove", true));
     private final BooleanSetting crawlPause = this.add(new BooleanSetting("CrawlPause", false));
-    private final BooleanSetting onlyInBlock = this.add(new BooleanSetting("OnlyInBlock", true, () -> !this.mode.is(Mode.Ground)));
+    private final BooleanSetting onlyInBlock = this.add(new BooleanSetting("OnlyInBlock", true, () -> !this.mode.is(Mode.Ground) && !this.mode.is(Mode.Freeze)));
     private final BooleanSetting headBlock = this.add(new BooleanSetting("HeadBlock", false));
 
     // Ground 模式专用设置
@@ -69,6 +71,10 @@ public class Criticals extends Module {
     private boolean paused = false;
     private boolean crawlingPaused = false;
     private boolean elytraPaused = false;
+    private boolean frozen = false;
+    private boolean freezeDelaying = false;
+    private long freezeDelayStart = 0;
+    private Vec3d freezePos = null;
 
     public Criticals() {
         super("Criticals", Module.Category.Combat);
@@ -146,7 +152,14 @@ public class Criticals extends Module {
         if (event.isCancelled()) return;
         if (Blink.INSTANCE.isOn() && Blink.INSTANCE.pauseModule.getValue()) return;
 
-        if (!this.mode.is(Mode.Ground)) {
+        if (this.mode.is(Mode.Freeze) && this.frozen) {
+            if (event.getPacket() instanceof PlayerMoveC2SPacket) {
+                event.cancel();
+            }
+            return;
+        }
+
+        if (!this.mode.is(Mode.Ground) && !this.mode.is(Mode.Freeze)) {
             boolean checkInBlock = this.onlyInBlock.getValue();
             boolean checkHead = this.headBlock.getValue();
             if (checkInBlock || checkHead) {
@@ -196,14 +209,32 @@ public class Criticals extends Module {
         this.paused = false;
         this.crawlingPaused = false;
         this.elytraPaused = false;
-        if (this.mode.is(Mode.Ground)) {
-            if (nullCheck()) return;
-            if (!this.shouldGroundActivate()) return;
-            if (mc.player.isOnGround() && this.autoJump.getValue() &&
-                    (!this.blockCheck.getValue() || BlockUtil.canCollide(mc.player, new Box(EntityUtil.getPlayerPos(true).up(2))))) {
-                this.jump();
+        if (this.mode.is(Mode.Freeze)) {
+            if (!nullCheck()) {
+                this.freezePos = mc.player.getPos();
+                mc.player.jump();
+            }
+        } else {
+            if (this.mode.is(Mode.Ground)) {
+                if (nullCheck()) return;
+                if (this.flight.getValue()) {
+                    this.freezePos = mc.player.getPos();
+                }
+                if (!this.shouldGroundActivate()) return;
+                if (mc.player.isOnGround() && this.autoJump.getValue() &&
+                        (!this.blockCheck.getValue() || BlockUtil.canCollide(mc.player, new Box(EntityUtil.getPlayerPos(true).up(2))))) {
+                    this.jump();
+                }
             }
         }
+    }
+
+    @Override
+    public void onDisable() {
+        this.frozen = false;
+        this.freezeDelaying = false;
+        this.freezeDelayStart = 0;
+        this.freezePos = null;
     }
 
     public void jump() {
@@ -279,7 +310,30 @@ public class Criticals extends Module {
         }
 
         // 非 Ground 模式不需要自动跳跃
-        if (!this.mode.is(Mode.Ground)) return;
+        if (!this.mode.is(Mode.Ground)) {
+            if (this.mode.is(Mode.Freeze)) {
+                if (!this.frozen) {
+                    if (mc.player.getVelocity().y < 0.0) {
+                        if (!this.freezeDelaying) {
+                            this.freezeDelaying = true;
+                            this.freezeDelayStart = System.currentTimeMillis();
+                        } else if (System.currentTimeMillis() - this.freezeDelayStart >= (long)this.freezeDelay.getValue()) {
+                            this.frozen = true;
+                            this.freezeDelaying = false;
+                        }
+                    }
+                } else {
+                    if (MovementUtil.isMoving()) {
+                        this.toggle();
+                        return;
+                    }
+
+                    mc.player.setVelocity(0.0, 0.0, 0.0);
+                    mc.player.setPosition(this.freezePos.x, this.freezePos.y, this.freezePos.z);
+                }
+            }
+            return;
+        }
 
         // Ground 模式自动跳跃逻辑
         if (!this.shouldGroundActivate()) return;
@@ -337,6 +391,7 @@ public class Criticals extends Module {
     public static enum Mode {
         NCP,
         GrimV3,
-        Ground
+        Ground,
+        Freeze
     }
 }

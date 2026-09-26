@@ -46,6 +46,8 @@ implements Wrapper {
         this.registerCommand(new WatermarkCommand());
         this.registerCommand(new PeekCommand());
         this.registerCommand(new GcCommand());
+        this.registerCommand(new KitCommand());
+        this.registerCommand(new InstantReplenishCommand());
     }
 
     public static void sendMessage(String message) {
@@ -118,4 +120,3 @@ implements Wrapper {
         }
     }
 }
-

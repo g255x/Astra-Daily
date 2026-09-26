@@ -182,12 +182,17 @@ public class ModuleManager
         this.addModule(new InteractTweaks());
         this.addModule(new PopChams());
         this.addModule(new Replenish());
+        this.addModule(new AutoReplenish());
+        this.addModule(new InstantReplenish());
         this.addModule(new ServerLagger());
         this.addModule(new Scaffold());
         this.addModule(new ShaderModule());
         this.addModule(new Skybox());
         this.addModule(new AntiCrawl());
         this.addModule(new AntiRegear());
+        this.addModule(new AutoEnderChest());
+        this.addModule(new DropAntiRegear());
+        this.addModule(new AutoMine());
         this.addModule(new SafeWalk());
         this.addModule(new Speed());
         this.addModule(new Sprint());

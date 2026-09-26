@@ -16,6 +16,7 @@ loom {
 repositories {
     flatDir {
         dirs 'lib'
+        dirs 'tools/libs'
     }
 }
 
@@ -30,6 +31,9 @@ dependencies {
     modImplementation name: 'satin-2.0.0'
 
     implementation 'org.apiguardian:apiguardian-api:1.1.2'
+
+    // J2CC 注解依赖（已启用）
+    compileOnly name: 'annotations-1.0.8'
 
     include name: 'IAS-9.0.6+1.21.1-fabric'
     include name: 'satin-2.0.0'
@@ -58,4 +62,207 @@ publishing {
             from components.java
         }
     }
+}
+
+// ====================================================================
+//  ProGuard 混淆任务（一级保护：名称混淆 + 压缩 + 优化）
+//  执行：gradlew proguardObfuscate
+// ====================================================================
+task proguardObfuscate(type: JavaExec) {
+    dependsOn remapJar
+
+    def proguardJar = file("tools/proguard.jar")
+    def rulesFile   = file("proguard-rules.pro")
+    def inputJar    = remapJar.archiveFile.get().asFile
+    def outputJar   = file("${buildDir}/libs/${project.name}-proguard.jar")
+    def mappingFile = file("${buildDir}/proguard/mapping.txt")
+    def dicFile     = file("dic.txt")
+    def tempProFile = file("${buildDir}/proguard/auto-config.pro")
+
+    def minecraftLibs = configurations.findByName('minecraftLibraries')
+    def compileLibs   = configurations.compileClasspath
+
+    doFirst {
+        if (!proguardJar.exists())
+            throw new GradleException("ProGuard jar not found: ${proguardJar.absolutePath}")
+        if (!rulesFile.exists())
+            throw new GradleException("proguard-rules.pro not found: ${rulesFile.absolutePath}")
+        if (!inputJar.exists())
+            throw new GradleException("Input jar not found: ${inputJar.absolutePath}")
+
+        outputJar.parentFile.mkdirs()
+        mappingFile.parentFile.mkdirs()
+        tempProFile.parentFile.mkdirs()
+
+        def libPaths = new LinkedHashSet<String>()
+
+        def javaHome = System.getProperty('java.home').replace('\\', '/')
+        libPaths.add("${javaHome}/jmods/java.base.jmod")
+        libPaths.add("${javaHome}/jmods/java.desktop.jmod")
+        libPaths.add("${javaHome}/jmods/java.net.http.jmod")
+
+        if (minecraftLibs != null) {
+            minecraftLibs.each { lib ->
+                if (lib.name.endsWith('.jar') && lib.exists()) {
+                    libPaths.add(lib.absolutePath)
+                }
+            }
+        }
+
+        compileLibs.each { lib ->
+            if (lib.name.endsWith('.jar') && lib.exists()) {
+                libPaths.add(lib.absolutePath)
+            }
+        }
+
+        def pro = new StringBuilder()
+
+        pro.append(rulesFile.getText('UTF-8')).append('\n')
+        pro.append("-injars '${inputJar.absolutePath}'\n")
+        pro.append("-outjars '${outputJar.absolutePath}'\n")
+        pro.append("-printmapping '${mappingFile.absolutePath}'\n")
+
+        libPaths.each { path ->
+            pro.append("-libraryjars '${path}'\n")
+        }
+
+        if (dicFile.exists()) {
+            def dicPath = dicFile.absolutePath
+            pro.append("-obfuscationdictionary '${dicPath}'\n")
+            pro.append("-classobfuscationdictionary '${dicPath}'\n")
+            pro.append("-packageobfuscationdictionary '${dicPath}'\n")
+        }
+
+        tempProFile.setText(pro.toString(), 'UTF-8')
+
+        println "ProGuard config written to: ${tempProFile.absolutePath}"
+        println "Config size: ${tempProFile.length()} bytes"
+        println "Library jars (deduplicated): ${libPaths.size()}"
+    }
+
+    args "@${tempProFile.absolutePath}"
+
+    classpath = files(proguardJar)
+    mainClass = 'proguard.ProGuard'
+}
+// ====================================================================
+//  J2CC 原生编译（二级保护）
+//  执行：gradlew j2ccNative
+// ====================================================================
+task j2ccNative(type: Exec) {
+    dependsOn proguardObfuscate
+
+    def j2ccJar    = file("tools/j2cc.jar")
+    def inputJar   = file("${buildDir}/libs/${project.name}-proguard.jar")
+    def outputJar  = file("${buildDir}/libs/${project.name}-native.jar")
+    def configFile = file("${buildDir}/j2cc-config.toml")
+    def nativesDir = file("tools/natives")
+    def zigDir     = file("tools/zig_compiler")
+
+    def minecraftLibs = configurations.findByName('minecraftLibraries')
+    def compileLibs   = configurations.compileClasspath
+
+    doFirst {
+        if (!j2ccJar.exists())
+            throw new GradleException("J2CC jar not found: ${j2ccJar.absolutePath}")
+        if (!inputJar.exists())
+            throw new GradleException("ProGuard output not found: ${inputJar.absolutePath}")
+        if (!new File(nativesDir, "nativeUtils.dll").exists())
+            throw new GradleException("nativeUtils.dll not found in ${nativesDir.absolutePath}")
+
+        outputJar.parentFile.mkdirs()
+        configFile.parentFile.mkdirs()
+
+        // ===== 收集所有依赖 jar =====
+        def libPaths = new LinkedHashSet<String>()
+
+        if (minecraftLibs != null) {
+            minecraftLibs.each { lib ->
+                if (lib.name.endsWith('.jar') && lib.exists()) {
+                    libPaths.add(lib.absolutePath.replace('\\', '/'))
+                }
+            }
+        }
+        compileLibs.each { lib ->
+            if (lib.name.endsWith('.jar') && lib.exists()) {
+                libPaths.add(lib.absolutePath.replace('\\', '/'))
+            }
+        }
+
+        // ===== Loom cache 里的 MC jar =====
+        def loomCacheDir = new File(gradle.gradleUserHomeDir, "caches/fabric-loom")
+        if (loomCacheDir.exists()) {
+            def mcJars = fileTree(loomCacheDir) {
+                include "**/minecraft-merged-*.jar"
+                exclude "**/*-sources.jar"
+                exclude "**/*-javadoc.jar"
+                exclude "**/*-dev.jar"
+                exclude "**/*-mappings*.jar"
+            }.files
+            mcJars.each { jarFile ->
+                libPaths.add(jarFile.absolutePath.replace('\\', '/'))
+            }
+            println "Added ${mcJars.size()} MC jars from Loom cache"
+
+            def otherJars = fileTree(loomCacheDir) {
+                include "**/*.jar"
+                exclude "**/minecraft-merged-*.jar"
+                exclude "**/*-sources.jar"
+                exclude "**/*-javadoc.jar"
+                exclude "**/*-dev.jar"
+                exclude "**/*-mappings*.jar"
+            }.files
+            otherJars.each { jarFile ->
+                libPaths.add(jarFile.absolutePath.replace('\\', '/'))
+            }
+            println "Added ${otherJars.size()} other jars from Loom cache"
+        }
+
+        // ===== 生成 j2cc-config.toml =====
+        def libsToml = libPaths.collect { "\"${it}\"" }.join(",\n        ")
+
+        def config = """# AUTOGENERATED by Gradle
+
+skipOptimizations = false
+compileClasses = []
+postCompileScripts = []
+parallelJobs = 1
+targets = ["x86_64-windows-gnu"]
+compilerType = "ZIG"
+keepTempDirectory = false
+compileAllMethods = false
+zigArgs = []
+vagueExceptions = false
+
+[debugSettings]
+printMethodLink = false
+printMethodEntryExit = false
+verboseLoader = false
+printMethodCalls = false
+dumpTranspilees = false
+verboseRuntime = false
+printBytecode = false
+
+[paths]
+inputPath = "${inputJar.absolutePath.replace('\\', '/')}"
+outputPath = "${outputJar.absolutePath.replace('\\', '/')}"
+tempPath = "${file("${buildDir}/j2cc-temp").absolutePath.replace('\\', '/')}"
+utilPath = "${nativesDir.absolutePath.replace('\\', '/')}"
+zigPath = "${zigDir.absolutePath.replace('\\', '/')}"
+libraries = [
+        ${libsToml}
+]
+"""
+        configFile.text = config
+
+        println "J2CC config written to: ${configFile.absolutePath}"
+        println "Total libraries: ${libPaths.size()}"
+    }
+
+    // ===== 关键：设置工作目录 =====
+    workingDir = nativesDir
+
+    commandLine 'java',
+            '-jar', j2ccJar.absolutePath,
+            'obfuscate', configFile.absolutePath
 }

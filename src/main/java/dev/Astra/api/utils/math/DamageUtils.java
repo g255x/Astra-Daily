@@ -64,6 +64,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import j2cc.Nativeify;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.PlayerListEntry;
@@ -393,7 +394,7 @@ public class DamageUtils {
         int modifier = EnchantmentHelper.getLevel((RegistryEntry)((RegistryEntry)Wrapper.mc.world.getRegistryManager().get(Enchantments.PROTECTION.getRegistryRef()).getEntry(Enchantments.PROTECTION).get()), (ItemStack)stack);
         return modifierBlast * 2 + modifier;
     }
-
+    @Nativeify
     private static float resistanceReduction(LivingEntity player, float damage) {
         StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
         if (resistance != null) {

@@ -5,6 +5,7 @@ package dev.Astra.api.utils.math;
 
 import dev.Astra.Astra;
 import dev.Astra.api.utils.Wrapper;
+import j2cc.Nativeify;
 
 public class AnimateUtil
 implements Wrapper {
@@ -16,7 +17,7 @@ implements Wrapper {
         float clampedDelta = MathUtil.clamp(AnimateUtil.deltaTime() * multiple, 0.0f, 1.0f);
         return (1.0f - clampedDelta) * end + clampedDelta * start;
     }
-
+    @Nativeify
     public static double animate(double current, double endPoint, double speed) {
         if (speed >= 1.0) {
             return endPoint;

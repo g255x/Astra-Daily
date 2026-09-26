@@ -13,6 +13,7 @@
 package dev.Astra.api.utils.math;
 
 import dev.Astra.api.utils.Wrapper;
+import j2cc.Nativeify;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.*;
@@ -121,7 +122,7 @@ implements Wrapper {
         double dZ = z2 - z1;
         return Math.sqrt(dX * dX + dY * dY + dZ * dZ);
     }
-
+    @Nativeify
     public static Vec3d getPointToBoxFromBottom(Vec3d eye, Vec3d bottom, double range, double boxSize, double step) {
         Vec3d target = null;
         double halfWidth = boxSize / 2.0;
