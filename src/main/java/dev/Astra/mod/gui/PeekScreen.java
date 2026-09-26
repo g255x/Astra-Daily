@@ -2,7 +2,7 @@ package dev.Astra.mod.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.misc.ShulkerViewer;
+import dev.Astra.mod.modules.impl.f.ShulkerViewer;
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.DrawContext;

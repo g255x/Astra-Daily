@@ -18,7 +18,7 @@ package dev.Astra.asm.mixins;
 import dev.Astra.Astra;
 import dev.Astra.api.events.impl.PacketEvent;
 import dev.Astra.core.impl.CommandManager;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.TimeoutException;
 import net.minecraft.network.ClientConnection;

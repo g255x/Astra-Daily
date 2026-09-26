@@ -14,7 +14,7 @@ package dev.Astra.core.impl;
 import dev.Astra.Astra;
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.world.BlockUtil;
-import dev.Astra.mod.modules.impl.combat.Breaker;
+import dev.Astra.mod.modules.impl.d.Breaker;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;

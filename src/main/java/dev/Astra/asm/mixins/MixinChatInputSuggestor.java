@@ -25,7 +25,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.Astra.Astra;
 import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.mod.commands.Command;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;

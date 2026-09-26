@@ -32,7 +32,7 @@ import dev.Astra.api.interfaces.IChatHudLineHook;
 import dev.Astra.api.utils.math.FadeUtils;
 import dev.Astra.api.utils.render.ColorUtil;
 import dev.Astra.asm.accessors.IChatHud;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;

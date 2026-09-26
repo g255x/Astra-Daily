@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.render.Render3DUtil;
 import dev.Astra.mod.gui.clickgui.ClickGuiScreen;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;

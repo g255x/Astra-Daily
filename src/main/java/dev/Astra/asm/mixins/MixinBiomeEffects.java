@@ -10,7 +10,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.Ambience;
+import dev.Astra.mod.modules.impl.j.Ambience;
 import net.minecraft.world.biome.BiomeEffects;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

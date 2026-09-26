@@ -7,8 +7,8 @@ import dev.Astra.mod.gui.items.Component;
 import dev.Astra.mod.gui.items.buttons.ModuleButton;
 import dev.Astra.mod.modules.HudModule;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.ClickGui;
-import dev.Astra.mod.modules.impl.hud.HudSetting;
+import dev.Astra.mod.modules.impl.c.ClickGui;
+import dev.Astra.mod.modules.impl.h.HudSetting;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.InputUtil;
 

@@ -11,7 +11,7 @@ import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.mod.gui.clickgui.ClickGuiScreen;
 import dev.Astra.mod.gui.items.Component;
 import dev.Astra.mod.gui.items.Item;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import net.minecraft.client.gui.DrawContext;
 
 import java.awt.*;

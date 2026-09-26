@@ -10,7 +10,7 @@ package dev.Astra.mod.gui.items.buttons;
 import dev.Astra.api.utils.render.ColorUtil;
 import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.mod.gui.clickgui.ClickGuiScreen;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import dev.Astra.mod.modules.settings.impl.EnumSetting;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.InputUtil;

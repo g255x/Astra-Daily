@@ -37,7 +37,7 @@ package dev.Astra.asm.mixins;
 
 import dev.Astra.Astra;
 import dev.Astra.api.events.impl.*;
-import dev.Astra.mod.modules.impl.exploit.AntiPacket;
+import dev.Astra.mod.modules.impl.e.AntiPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommonNetworkHandler;
 import net.minecraft.client.network.ClientConnectionState;

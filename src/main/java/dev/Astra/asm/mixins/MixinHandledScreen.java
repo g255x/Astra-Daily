@@ -24,7 +24,7 @@ package dev.Astra.asm.mixins;
 
 import dev.Astra.Astra;
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.misc.ShulkerViewer;
+import dev.Astra.mod.modules.impl.f.ShulkerViewer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

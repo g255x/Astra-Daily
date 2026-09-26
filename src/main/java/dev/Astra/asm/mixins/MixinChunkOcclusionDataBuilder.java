@@ -7,7 +7,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.Xray;
+import dev.Astra.mod.modules.impl.j.Xray;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;

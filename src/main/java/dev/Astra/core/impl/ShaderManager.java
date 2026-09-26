@@ -19,7 +19,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.Astra.api.interfaces.IShaderEffectHook;
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.math.Timer;
-import dev.Astra.mod.modules.impl.render.ShaderModule;
+import dev.Astra.mod.modules.impl.j.ShaderModule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.PostEffectProcessor;

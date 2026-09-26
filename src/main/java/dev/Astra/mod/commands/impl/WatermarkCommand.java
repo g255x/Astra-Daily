@@ -4,7 +4,7 @@
 package dev.Astra.mod.commands.impl;
 
 import dev.Astra.mod.commands.Command;
-import dev.Astra.mod.modules.impl.hud.WaterMarkHudModule;
+import dev.Astra.mod.modules.impl.h.WaterMarkHudModule;
 
 import java.util.Arrays;
 import java.util.List;

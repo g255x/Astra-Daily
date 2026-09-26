@@ -21,9 +21,9 @@
 package dev.Astra.asm.mixins;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.Astra.mod.modules.impl.render.Ambience;
-import dev.Astra.mod.modules.impl.render.NoRender;
-import dev.Astra.mod.modules.impl.render.Xray;
+import dev.Astra.mod.modules.impl.j.Ambience;
+import dev.Astra.mod.modules.impl.j.NoRender;
+import dev.Astra.mod.modules.impl.j.Xray;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;

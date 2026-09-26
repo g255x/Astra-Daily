@@ -13,7 +13,7 @@ import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.core.impl.FontManager;
 import dev.Astra.mod.gui.items.Item;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import dev.Astra.mod.modules.settings.Setting;
 import dev.Astra.mod.modules.settings.impl.*;
 import net.minecraft.client.gui.DrawContext;

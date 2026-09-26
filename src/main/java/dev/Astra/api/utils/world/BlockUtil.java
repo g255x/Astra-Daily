@@ -56,12 +56,12 @@ import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.math.MathUtil;
 import dev.Astra.api.utils.player.EntityUtil;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.AntiCheat;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
-import dev.Astra.mod.modules.impl.combat.AutoCrystal;
-import dev.Astra.mod.modules.impl.combat.AutoWeb;
-import dev.Astra.mod.modules.impl.player.AirPlace;
-import dev.Astra.mod.modules.settings.enums.SwingSide;
+import dev.Astra.mod.modules.impl.c.AntiCheat;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
+import dev.Astra.mod.modules.impl.d.AutoCrystal;
+import dev.Astra.mod.modules.impl.d.AutoWeb;
+import dev.Astra.mod.modules.impl.l.AirPlace;
+import dev.Astra.mod.modules.settings.enums.a;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -248,7 +248,7 @@ implements Wrapper {
         }
     }
 
-    public static void clickBlock(BlockPos pos, Direction side, boolean rotate, Hand hand, SwingSide swingSide) {
+    public static void clickBlock(BlockPos pos, Direction side, boolean rotate, Hand hand, a swingSide) {
         Vec3d directionVec = new Vec3d((double)pos.getX() + 0.5 + (double)side.getVector().getX() * 0.5, (double)pos.getY() + 0.5 + (double)side.getVector().getY() * 0.5, (double)pos.getZ() + 0.5 + (double)side.getVector().getZ() * 0.5);
         if (rotate) {
             Astra.ROTATION.lookAt(directionVec);

@@ -20,7 +20,7 @@ package dev.Astra.asm.mixins;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.misc.ExtraTab;
+import dev.Astra.mod.modules.impl.f.ExtraTab;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.PlayerListEntry;
 import org.spongepowered.asm.mixin.Final;

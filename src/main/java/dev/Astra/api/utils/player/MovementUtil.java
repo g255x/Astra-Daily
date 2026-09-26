@@ -9,7 +9,7 @@ package dev.Astra.api.utils.player;
 
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.asm.accessors.IVec3d;
-import dev.Astra.mod.modules.impl.movement.HoleSnap;
+import dev.Astra.mod.modules.impl.i.HoleSnap;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 

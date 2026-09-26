@@ -8,7 +8,7 @@
 package dev.Astra.api.utils.path;
 
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.client.BaritoneModule;
+import dev.Astra.mod.modules.impl.c.BaritoneModule;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 

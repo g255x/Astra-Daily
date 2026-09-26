@@ -4,7 +4,7 @@
 package dev.Astra.mod.commands.impl;
 
 import dev.Astra.mod.commands.Command;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import java.util.List;
 
 public class PrefixCommand

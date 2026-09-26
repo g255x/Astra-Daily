@@ -16,7 +16,7 @@ package dev.Astra.asm.mixins;
 import dev.Astra.Astra;
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.core.impl.CommandManager;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.util.Formatting;

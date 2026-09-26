@@ -19,7 +19,7 @@
 package dev.Astra.asm.mixins;
 
 import dev.Astra.api.utils.render.SimpleItemModel;
-import dev.Astra.mod.modules.impl.render.NoRender;
+import dev.Astra.mod.modules.impl.j.NoRender;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;

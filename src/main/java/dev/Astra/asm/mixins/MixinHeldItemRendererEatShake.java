@@ -10,7 +10,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.ViewModel;
+import dev.Astra.mod.modules.impl.j.ViewModel;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

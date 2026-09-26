@@ -20,7 +20,7 @@ import dev.Astra.api.events.impl.PacketEvent;
 import dev.Astra.api.events.impl.TotemEvent;
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;

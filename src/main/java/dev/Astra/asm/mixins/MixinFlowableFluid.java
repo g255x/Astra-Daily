@@ -10,7 +10,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.movement.Velocity;
+import dev.Astra.mod.modules.impl.i.Velocity;
 import net.minecraft.fluid.FlowableFluid;
 import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;

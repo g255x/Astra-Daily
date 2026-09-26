@@ -3,7 +3,7 @@
  */
 package dev.Astra.core.impl;
 
-import dev.Astra.mod.modules.impl.player.TimerModule;
+import dev.Astra.mod.modules.impl.l.TimerModule;
 
 public class TimerManager {
     public float timer = 1.0f;

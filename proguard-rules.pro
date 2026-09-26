@@ -56,7 +56,8 @@
 -keepattributes RuntimeInvisibleAnnotations
 
 # ====================================================================
-#  保留 J2CC 注解方法
+#  J2CC 注解方法：必须保留类名（J2CC 的 <clinit> 依赖原类名）
+#  ⚠️ 不要改成 -keepclassmembers,allowobfuscation —— 会崩溃
 # ====================================================================
 -keepclasseswithmembers class * {
     @j2cc.Nativeify <methods>;
@@ -80,7 +81,7 @@
 -optimizations !code/allocation/variable
 
 # ====================================================================
-#  重打包（不要加 -allowaccessmodification，会破坏 Mixin）
+#  重打包
 # ====================================================================
 -repackageclasses 'dev.Astra'
 

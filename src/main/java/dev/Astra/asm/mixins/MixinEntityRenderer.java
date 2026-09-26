@@ -15,7 +15,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.NameTags;
+import dev.Astra.mod.modules.impl.j.NameTags;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;

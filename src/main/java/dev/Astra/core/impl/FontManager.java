@@ -7,7 +7,7 @@
 package dev.Astra.core.impl;
 
 import dev.Astra.mod.gui.fonts.FontRenderer;
-import dev.Astra.mod.modules.impl.client.Fonts;
+import dev.Astra.mod.modules.impl.c.Fonts;
 import net.minecraft.client.util.math.MatrixStack;
 
 import java.awt.*;

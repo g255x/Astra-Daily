@@ -16,10 +16,10 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.player.FreeLook;
-import dev.Astra.mod.modules.impl.player.Freecam;
-import dev.Astra.mod.modules.impl.render.CameraClip;
-import dev.Astra.mod.modules.impl.render.MotionCamera;
+import dev.Astra.mod.modules.impl.l.FreeLook;
+import dev.Astra.mod.modules.impl.l.Freecam;
+import dev.Astra.mod.modules.impl.j.CameraClip;
+import dev.Astra.mod.modules.impl.j.MotionCamera;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.BlockView;

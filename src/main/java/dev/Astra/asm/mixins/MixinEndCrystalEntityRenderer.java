@@ -36,7 +36,7 @@ package dev.Astra.asm.mixins;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.Astra.api.utils.render.ModelPlayer;
-import dev.Astra.mod.modules.impl.render.Chams;
+import dev.Astra.mod.modules.impl.j.Chams;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.*;

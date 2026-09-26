@@ -3,8 +3,8 @@ package dev.Astra;
 import dev.Astra.api.events.eventbus.EventBus;
 import dev.Astra.api.events.impl.InitEvent;
 import dev.Astra.core.impl.*;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
-import dev.Astra.mod.modules.impl.misc.KillEffect;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
+import dev.Astra.mod.modules.impl.f.KillEffect;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.MinecraftClient;
 

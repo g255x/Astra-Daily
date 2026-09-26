@@ -10,7 +10,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.exploit.AntiPacket;
+import dev.Astra.mod.modules.impl.e.AntiPacket;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.PacketByteBuf;
 import org.spongepowered.asm.mixin.Mixin;

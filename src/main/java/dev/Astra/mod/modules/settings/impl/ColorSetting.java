@@ -4,7 +4,7 @@
 package dev.Astra.mod.modules.settings.impl;
 
 import dev.Astra.api.utils.math.Timer;
-import dev.Astra.mod.modules.impl.client.ColorsModule;
+import dev.Astra.mod.modules.impl.c.ColorsModule;
 import dev.Astra.mod.modules.settings.Setting;
 
 import java.awt.*;

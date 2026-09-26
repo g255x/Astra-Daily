@@ -11,7 +11,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.NoRender;
+import dev.Astra.mod.modules.impl.j.NoRender;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.ToastManager;
 import org.spongepowered.asm.mixin.Mixin;

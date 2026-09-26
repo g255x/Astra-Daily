@@ -14,7 +14,7 @@ import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.world.BlockPosX;
 import dev.Astra.api.utils.world.BlockUtil;
 import dev.Astra.asm.accessors.IEntity;
-import dev.Astra.mod.modules.impl.client.AntiCheat;
+import dev.Astra.mod.modules.impl.c.AntiCheat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;

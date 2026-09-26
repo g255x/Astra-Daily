@@ -14,7 +14,7 @@ import dev.Astra.api.utils.math.MathUtil;
 import dev.Astra.api.utils.render.ColorUtil;
 import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.core.impl.FontManager;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Identifier;
 

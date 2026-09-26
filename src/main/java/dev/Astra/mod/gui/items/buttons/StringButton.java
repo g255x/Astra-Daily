@@ -13,7 +13,7 @@ package dev.Astra.mod.gui.items.buttons;
 import dev.Astra.api.utils.math.Timer;
 import dev.Astra.api.utils.render.ColorUtil;
 import dev.Astra.api.utils.render.Render2DUtil;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import dev.Astra.mod.modules.settings.impl.StringSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

@@ -22,7 +22,7 @@ import dev.Astra.api.utils.math.Easing;
 import dev.Astra.api.utils.render.ColorUtil;
 import dev.Astra.api.utils.render.Render2DUtil;
 import dev.Astra.core.impl.CommandManager;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import dev.Astra.mod.modules.settings.impl.ColorSetting;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;

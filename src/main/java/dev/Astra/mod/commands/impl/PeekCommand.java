@@ -7,7 +7,7 @@
 package dev.Astra.mod.commands.impl;
 
 import dev.Astra.mod.commands.Command;
-import dev.Astra.mod.modules.impl.misc.ShulkerViewer;
+import dev.Astra.mod.modules.impl.f.ShulkerViewer;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;

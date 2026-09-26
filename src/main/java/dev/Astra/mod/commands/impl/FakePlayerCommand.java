@@ -5,7 +5,7 @@ package dev.Astra.mod.commands.impl;
 
 import dev.Astra.Astra;
 import dev.Astra.mod.commands.Command;
-import dev.Astra.mod.modules.impl.misc.FakePlayer;
+import dev.Astra.mod.modules.impl.f.FakePlayer;
 import java.util.ArrayList;
 import java.util.List;
 

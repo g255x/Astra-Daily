@@ -18,7 +18,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.misc.ShulkerViewer;
+import dev.Astra.mod.modules.impl.f.ShulkerViewer;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;

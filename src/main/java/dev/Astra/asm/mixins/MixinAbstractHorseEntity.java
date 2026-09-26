@@ -13,7 +13,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.movement.EntityControl;
+import dev.Astra.mod.modules.impl.i.EntityControl;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.AnimalEntity;

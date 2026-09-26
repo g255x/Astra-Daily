@@ -16,7 +16,7 @@
 package dev.Astra.asm.mixins;
 
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.movement.FastWeb;
+import dev.Astra.mod.modules.impl.i.FastWeb;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CobwebBlock;
 import net.minecraft.entity.Entity;

@@ -14,7 +14,7 @@ import dev.Astra.api.utils.math.Animation;
 import dev.Astra.api.utils.math.Easing;
 import dev.Astra.core.impl.FontManager;
 import dev.Astra.mod.Mod;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;

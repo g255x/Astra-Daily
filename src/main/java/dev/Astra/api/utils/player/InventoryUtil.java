@@ -2,8 +2,8 @@ package dev.Astra.api.utils.player;
 
 import dev.Astra.api.utils.Wrapper;
 import dev.Astra.api.utils.world.BlockUtil;
-import dev.Astra.mod.modules.impl.client.AntiCheat;
-import dev.Astra.mod.modules.impl.combat.ForceEat;
+import dev.Astra.mod.modules.impl.c.AntiCheat;
+import dev.Astra.mod.modules.impl.d.ForceEat;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;

@@ -13,7 +13,7 @@ import dev.Astra.api.utils.Wrapper;
 import dev.Astra.mod.commands.Command;
 import dev.Astra.mod.commands.impl.*;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
 import net.minecraft.text.Text;
 
 import java.util.HashMap;

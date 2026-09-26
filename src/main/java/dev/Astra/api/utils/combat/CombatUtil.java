@@ -23,7 +23,7 @@ import dev.Astra.api.utils.math.MathUtil;
 import dev.Astra.api.utils.math.Timer;
 import dev.Astra.api.utils.player.EntityUtil;
 import dev.Astra.api.utils.world.BlockUtil;
-import dev.Astra.mod.modules.impl.client.AntiCheat;
+import dev.Astra.mod.modules.impl.c.AntiCheat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;

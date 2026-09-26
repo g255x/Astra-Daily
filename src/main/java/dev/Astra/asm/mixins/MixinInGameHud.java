@@ -23,9 +23,9 @@ package dev.Astra.asm.mixins;
 
 import dev.Astra.Astra;
 import dev.Astra.api.events.impl.PreRender2DEvent;
-import dev.Astra.mod.modules.impl.client.ClientSetting;
-import dev.Astra.mod.modules.impl.render.Crosshair;
-import dev.Astra.mod.modules.impl.render.NoRender;
+import dev.Astra.mod.modules.impl.c.ClientSetting;
+import dev.Astra.mod.modules.impl.j.Crosshair;
+import dev.Astra.mod.modules.impl.j.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;

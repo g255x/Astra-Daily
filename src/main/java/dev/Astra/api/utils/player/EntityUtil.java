@@ -35,8 +35,8 @@ import dev.Astra.api.utils.world.BlockPosX;
 import dev.Astra.api.utils.world.BlockUtil;
 import dev.Astra.mod.gui.PeekScreen;
 import dev.Astra.mod.gui.clickgui.ClickGuiScreen;
-import dev.Astra.mod.modules.impl.client.AntiCheat;
-import dev.Astra.mod.modules.settings.enums.SwingSide;
+import dev.Astra.mod.modules.impl.c.AntiCheat;
+import dev.Astra.mod.modules.settings.enums.a;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -119,7 +119,7 @@ implements Wrapper {
         return result == null || result.getType() == HitResult.Type.MISS;
     }
 
-    public static void swingHand(Hand hand, SwingSide side) {
+    public static void swingHand(Hand hand, a side) {
         switch (side) {
             case All: {
                 EntityUtil.mc.player.swingHand(hand);

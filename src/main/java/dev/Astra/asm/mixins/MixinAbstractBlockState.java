@@ -8,7 +8,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.Xray;
+import dev.Astra.mod.modules.impl.j.Xray;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;

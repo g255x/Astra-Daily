@@ -12,7 +12,7 @@ import com.google.common.base.Splitter;
 import dev.Astra.Astra;
 import dev.Astra.core.Manager;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.Fonts;
+import dev.Astra.mod.modules.impl.c.Fonts;
 import dev.Astra.mod.modules.settings.Setting;
 import dev.Astra.mod.modules.settings.impl.*;
 import org.apache.commons.io.IOUtils;

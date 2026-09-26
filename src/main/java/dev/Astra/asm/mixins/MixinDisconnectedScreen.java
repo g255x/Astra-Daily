@@ -27,7 +27,7 @@
 package dev.Astra.asm.mixins;
 
 import dev.Astra.api.utils.Wrapper;
-import dev.Astra.mod.modules.impl.misc.AutoReconnect;
+import dev.Astra.mod.modules.impl.f.AutoReconnect;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DisconnectedScreen;

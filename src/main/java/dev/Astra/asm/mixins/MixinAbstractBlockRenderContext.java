@@ -14,7 +14,7 @@
  */
 package dev.Astra.asm.mixins;
 
-import dev.Astra.mod.modules.impl.render.Xray;
+import dev.Astra.mod.modules.impl.j.Xray;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractBlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;

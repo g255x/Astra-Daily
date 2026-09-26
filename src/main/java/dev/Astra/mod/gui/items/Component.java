@@ -10,7 +10,7 @@ import dev.Astra.mod.gui.clickgui.ClickGuiScreen;
 import dev.Astra.mod.gui.items.buttons.Button;
 import dev.Astra.mod.gui.items.buttons.ModuleButton;
 import dev.Astra.mod.modules.Module;
-import dev.Astra.mod.modules.impl.client.ClickGui;
+import dev.Astra.mod.modules.impl.c.ClickGui;
 import net.minecraft.client.gui.DrawContext;
 
 import java.awt.*;
