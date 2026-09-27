@@ -19,8 +19,8 @@ import dev.Astra.mod.modules.impl.d.AutoAnchor;
 import dev.Astra.mod.modules.impl.d.Criticals;
 import dev.Astra.mod.modules.impl.e.Blink;
 import dev.Astra.mod.modules.impl.i.ElytraFly;
-import dev.Astra.mod.modules.settings.enums.a;
 import dev.Astra.mod.modules.settings.enums.Timing;
+import dev.Astra.mod.modules.settings.enums.a;
 import dev.Astra.mod.modules.settings.impl.BooleanSetting;
 import dev.Astra.mod.modules.settings.impl.ColorSetting;
 import dev.Astra.mod.modules.settings.impl.EnumSetting;
@@ -36,9 +36,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.RespawnAnchorBlock;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AirBlockItem;
@@ -56,8 +58,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
 
 public class PacketMine extends Module {
     public static PacketMine INSTANCE;
@@ -66,12 +66,12 @@ public class PacketMine extends Module {
     private final FadeUtils animationTime = new FadeUtils(1000L);
     private final FadeUtils secondAnim = new FadeUtils(1000L);
     private final DecimalFormat df = new DecimalFormat("0.0");
-    private final EnumSetting<Page> page = this.add(new EnumSetting<Page>("Page", Page.General));
+    private final EnumSetting<Page> page = this.add(new EnumSetting<>("Page", Page.General));
     private final SliderSetting stopDelay = this.add(new SliderSetting("StopDelay", 50.0, 0.0, 500.0, 1.0, () -> this.page.is(Page.General)));
     private final SliderSetting startDelay = this.add(new SliderSetting("StartDelay", 200.0, 0.0, 500.0, 1.0, () -> this.page.is(Page.General)));
     private final SliderSetting damage = this.add(new SliderSetting("Damage", 0.7f, 0.0, 2.0, 0.01, () -> this.page.is(Page.General)));
     private final SliderSetting maxBreak = this.add(new SliderSetting("MaxBreak", 3.0, 0.0, 20.0, 1.0, () -> this.page.is(Page.General)));
-    private final EnumSetting<Timing> timing = this.add(new EnumSetting<Timing>("Timing", Timing.All, () -> this.page.getValue() == Page.General));
+    private final EnumSetting<Timing> timing = this.add(new EnumSetting<>("Timing", Timing.All, () -> this.page.getValue() == Page.General));
     private final BooleanSetting fastBypass = this.add(new BooleanSetting("FastBypass", false, () -> this.page.is(Page.General)));
     private final BooleanSetting instant = this.add(new BooleanSetting("Instant", false, () -> this.page.is(Page.General)));
     private final BooleanSetting wait = this.add(new BooleanSetting("Wait", true, () -> !this.instant.getValue() && this.page.is(Page.General)));
@@ -85,7 +85,7 @@ public class PacketMine extends Module {
     private final BooleanSetting swing = this.add(new BooleanSetting("Swing", true, () -> this.page.is(Page.General)));
     private final BooleanSetting endSwing = this.add(new BooleanSetting("EndSwing", false, () -> this.page.is(Page.General)));
     public final SliderSetting range = this.add(new SliderSetting("Range", 6.0, 3.0, 10.0, 0.1, () -> this.page.is(Page.General)));
-    private final EnumSetting<a> swingMode = this.add(new EnumSetting<a>("SwingSide", a.All, () -> this.page.is(Page.General)));
+    private final EnumSetting<a> swingMode = this.add(new EnumSetting<>("SwingSide", a.All, () -> this.page.is(Page.General)));
     private final BooleanSetting unbreakableCancel = this.add(new BooleanSetting("UnbreakableCancel", true, () -> this.page.is(Page.Check)));
     private final BooleanSetting checkWeb = this.add(new BooleanSetting("CheckWeb", true, () -> this.page.is(Page.Check)));
     private final BooleanSetting checkGround = this.add(new BooleanSetting("CheckGround", true, () -> this.page.is(Page.Check)));
@@ -103,9 +103,9 @@ public class PacketMine extends Module {
     private final SliderSetting fov = this.add(new SliderSetting("Fov", 20.0, 0.0, 360.0, 0.1, () -> this.page.is(Page.Rotation) && this.yawStep.isOpen()));
     private final SliderSetting priority = this.add(new SliderSetting("Priority", 100, 0, 100, () -> this.page.is(Page.Rotation) && this.yawStep.isOpen()));
     private final BooleanSetting checkDouble = this.add(new BooleanSetting("CheckDouble", false, () -> this.page.is(Page.Render)));
-    private final EnumSetting<Animation> animation = this.add(new EnumSetting<Animation>("Animation", Animation.Up, () -> this.page.is(Page.Render)));
-    private final EnumSetting<Easing> ease = this.add(new EnumSetting<Easing>("Ease", Easing.CubicInOut, () -> this.page.is(Page.Render)));
-    private final EnumSetting<Easing> fadeEase = this.add(new EnumSetting<Easing>("FadeEase", Easing.CubicInOut, () -> this.page.is(Page.Render)));
+    private final EnumSetting<Animation> animation = this.add(new EnumSetting<>("Animation", Animation.Up, () -> this.page.is(Page.Render)));
+    private final EnumSetting<Easing> ease = this.add(new EnumSetting<>("Ease", Easing.CubicInOut, () -> this.page.is(Page.Render)));
+    private final EnumSetting<Easing> fadeEase = this.add(new EnumSetting<>("FadeEase", Easing.CubicInOut, () -> this.page.is(Page.Render)));
     private final SliderSetting expandLine = this.add(new SliderSetting("ExpandLine", 0.0, 0.0, 1.0, () -> this.page.is(Page.Render)));
     private final ColorSetting startColor = this.add(new ColorSetting("StartFill", new Color(255, 255, 255, 100), () -> this.page.is(Page.Render)));
     private final ColorSetting startOutlineColor = this.add(new ColorSetting("StartOutline", new Color(255, 255, 255, 100), () -> this.page.is(Page.Render)));
@@ -125,7 +125,6 @@ public class PacketMine extends Module {
     public static boolean complete;
     int lastSlot = -1;
     Vec3d directionVec = null;
-    Runnable switchBack;
     BlockPos breakPos;
     boolean startPacket = false;
     int breakNumber = 0;
@@ -156,7 +155,7 @@ public class PacketMine extends Module {
         return this.df.format(progress * 100.0) + "%";
     }
 
-    // ⚠️ @EventListener，不能加 @Nativeify
+    // ⚠️ @EventListener
     @EventListener
     public void onRotate(RotationEvent event) {
         if (this.rotate.getValue() && this.shouldYawStep() && this.directionVec != null && !this.sync.passedMs(this.syncTime.getValue())) {
@@ -181,324 +180,286 @@ public class PacketMine extends Module {
         this.breakPos = null;
     }
 
-    // ⚠️ 大量 InventoryUtil + 附魔，不加
+    // ⚠️ 大量 InventoryUtil + 附魔，不加 @Nativeify
     private void autoSwitch() {
+        if (mc.player == null || mc.world == null) return;
         if (this.autoSwitch.getValue() && this.doubleBreak.getValue()) {
             int index = -1;
             if (secondPos != null) {
                 float CurrentFastest = 1.0f;
                 for (int i = 0; i < 9; ++i) {
-                    float destroySpeed;
-                    float digSpeed;
-                    ItemStack stack = PacketMine.mc.player.getInventory().getStack(i);
-                    if (stack == ItemStack.EMPTY || !((digSpeed = (float)EnchantmentHelper.getLevel((RegistryEntry)((RegistryEntry)PacketMine.mc.world.getRegistryManager().get(Enchantments.EFFICIENCY.getRegistryRef()).getEntry(Enchantments.EFFICIENCY).get()), (ItemStack)stack)) + (destroySpeed = stack.getMiningSpeedMultiplier(PacketMine.mc.world.getBlockState(secondPos))) > CurrentFastest)) continue;
+                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    if (stack == ItemStack.EMPTY) continue;
+                    float digSpeed = getEfficiencyLevel(stack);
+                    float destroySpeed = stack.getMiningSpeedMultiplier(mc.world.getBlockState(secondPos));
+                    if (digSpeed + destroySpeed <= CurrentFastest) continue;
                     CurrentFastest = digSpeed + destroySpeed;
                     index = i;
                 }
             }
-            if (index == -1 || PacketMine.mc.options.useKey.isPressed() || PacketMine.mc.options.attackKey.isPressed() || PacketMine.mc.player.isUsingItem() || !this.secondTimer.passedMs(this.getBreakTime(secondPos, index, this.start.getValue()))) {
+            if (index == -1 || mc.options.useKey.isPressed() || mc.options.attackKey.isPressed() || mc.player.isUsingItem() || !this.secondTimer.passedMs(this.getBreakTime(secondPos, index, this.start.getValue()))) {
                 if (this.swapped) {
                     InventoryUtil.switchToSlot(this.mainSlot);
                     this.swapped = false;
                 }
-            } else if (index != PacketMine.mc.player.getInventory().selectedSlot) {
-                this.mainSlot = PacketMine.mc.player.getInventory().selectedSlot;
+            } else if (index != mc.player.getInventory().selectedSlot) {
+                this.mainSlot = mc.player.getInventory().selectedSlot;
                 InventoryUtil.switchToSlot(index);
                 this.swapped = true;
             }
         }
     }
 
+    // ==================== onTick：调度 ====================
     // ⚠️ @EventListener，不能加 @Nativeify
     @EventListener
     public void onTick(ClientTickEvent event) {
-        if (PacketMine.nullCheck()) {
-            return;
-        }
-        if (this.breakPos != null && PacketMine.mc.world.isAir(this.breakPos)) {
-            complete = true;
-        }
-        if (secondPos != null) {
-            int secondSlot = this.getTool(secondPos);
-            if (secondSlot == -1) {
-                secondSlot = PacketMine.mc.player.getInventory().selectedSlot;
-            }
-            this.secondFinalTime = this.getBreakTime(secondPos, secondSlot, 1.0);
-            if (this.isAir(secondPos) || PacketMine.unbreakable(secondPos)) {
-                secondPos = null;
-            } else {
-                double time = this.getBreakTime(secondPos, PacketMine.mc.player.getInventory().selectedSlot, 1.0);
-                if (this.secondTimer.passedMs(time * this.timeOut.getValue())) {
-                    secondPos = null;
-                }
-            }
-        }
-        if (this.switchBack != null && event.isPre()) {
-            this.switchBack.run();
-            this.switchBack = null;
-        }
-        if (this.timing.is(Timing.Pre) && event.isPost() || this.timing.is(Timing.Post) && event.isPre()) {
-            return;
-        }
-        if (PacketMine.mc.player.isDead()) {
-            secondPos = null;
-        }
+        if (PacketMine.nullCheck()) return;
+        PlayerEntity player = mc.player;
+        if (player == null || mc.world == null) return;
+
+        // --- 预处理 ---
+        this.updateCompleteState();
+        this.updateSecondPos();
+
+        if (this.timing.is(Timing.Pre) && event.isPost() || this.timing.is(Timing.Post) && event.isPre()) return;
+        if (player.isDead()) secondPos = null;
+
         this.autoSwitch();
-        if (PacketMine.mc.player.isCreative()) {
-            this.startPacket = false;
-            ghost = false;
-            complete = false;
-            this.breakNumber = 0;
-            this.breakPos = null;
-            progress = 0.0;
+
+        // --- 状态检查 ---
+        if (player.isCreative()) {
+            this.resetMiningState();
             return;
         }
         if (this.breakPos == null) {
-            this.breakNumber = 0;
-            this.startPacket = false;
-            ghost = false;
-            complete = false;
-            progress = 0.0;
+            this.resetMiningState();
             return;
         }
+
+        // --- 计算 ---
         int slot = this.getTool(this.breakPos);
-        if (slot == -1) {
-            slot = PacketMine.mc.player.getInventory().selectedSlot;
-        }
+        if (slot == -1) slot = player.getInventory().selectedSlot;
+
         this.breakFinalTime = this.getBreakTime(this.breakPos, slot);
-        progress = (double)this.mineTimer.getMs() / this.breakFinalTime;
-        if (this.isAir(this.breakPos)) {
-            this.breakNumber = 0;
+        progress = (double) this.mineTimer.getMs() / this.breakFinalTime;
+        if (this.isAir(this.breakPos)) this.breakNumber = 0;
+
+        // --- 中止 / 不可破坏判断 ---
+        if (this.shouldAbortMining()) return;
+        if (PacketMine.unbreakable(this.breakPos)) {
+            this.handleUnbreakable();
+            return;
         }
-        if ((double)this.breakNumber > this.maxBreak.getValue() - 1.0 && this.maxBreak.getValue() > 0.0 && !complete || !this.wait.getValue() && this.isAir(this.breakPos) && !this.instant.getValue()) {
-            if (this.breakPos.equals((Object)secondPos)) {
+        if (!this.passPreconditionChecks(player)) return;
+
+        // --- 执行 ---
+        if (this.startPacket) {
+            this.executeStopPacket(player, slot);
+        } else {
+            this.executeStartPacket(player, slot);
+        }
+    }
+
+    // ==================== onTick 拆分出来的 @Nativeify 方法 ====================
+
+    @Nativeify
+    private void updateCompleteState() {
+        if (this.breakPos != null && mc.world != null && mc.world.isAir(this.breakPos)) {
+            complete = true;
+        }
+    }
+
+    @Nativeify
+    private void updateSecondPos() {
+        if (secondPos == null) return;
+        if (mc.player == null || mc.world == null) return;
+
+        int secondSlot = this.getTool(secondPos);
+        if (secondSlot == -1) secondSlot = mc.player.getInventory().selectedSlot;
+        this.secondFinalTime = this.getBreakTime(secondPos, secondSlot, 1.0);
+
+        if (this.isAir(secondPos) || PacketMine.unbreakable(secondPos)) {
+            secondPos = null;
+        } else {
+            double time = this.getBreakTime(secondPos, mc.player.getInventory().selectedSlot, 1.0);
+            if (this.secondTimer.passedMs(time * this.timeOut.getValue())) {
                 secondPos = null;
             }
-            this.startPacket = false;
-            ghost = false;
-            complete = false;
-            this.breakNumber = 0;
-            this.breakPos = null;
-            return;
-        }
-        if (PacketMine.unbreakable(this.breakPos)) {
-            if (this.unbreakableCancel.getValue()) {
-                this.breakPos = null;
-                this.startPacket = false;
-                ghost = false;
-                complete = false;
-            }
-            this.breakNumber = 0;
-            return;
-        }
-        if ((double)MathHelper.sqrt((float)((float)PacketMine.mc.player.getEyePos().squaredDistanceTo(this.breakPos.toCenterPos()))) > this.range.getValue()) {
-            return;
-        }
-        if (this.usingPause.getValue() && mc.player.isUsingItem() && (!this.allowOffhand.getValue() || PacketMine.mc.player.getActiveHand() == Hand.MAIN_HAND)) {
-            return;
-        }
-        if (Blink.INSTANCE.isOn() && Blink.INSTANCE.pauseModule.getValue()) {
-            return;
-        }
-        if (this.breakPos.equals((Object)AutoAnchor.INSTANCE.currentPos) && BlockUtil.getBlock(PacketMine.getBreakPos()) instanceof RespawnAnchorBlock) {
-            return;
-        }
-        if (!this.hotBar.getValue() && !EntityUtil.inInventory()) {
-            return;
-        }
-        if (!this.delayTimer.passed((long)this.stopDelay.getValue())) {
-            return;
-        }
-        if (this.startPacket) {
-            if (this.isAir(this.breakPos)) {
-                return;
-            }
-            if (this.mineTimer.passed((long)this.breakFinalTime)) {
-                boolean shouldSwitch;
-                if (this.endRotate.getValue() && this.shouldYawStep() && !this.faceVector(this.breakPos.toCenterPos().offset(BlockUtil.getClickSide(this.breakPos), 0.5))) {
-                    return;
-                }
-                int old = PacketMine.mc.player.getInventory().selectedSlot;
-                if (this.hotBar.getValue()) {
-                    shouldSwitch = slot != old;
-                } else {
-                    if (slot < 9) {
-                        slot += 36;
-                    }
-                    boolean bl = shouldSwitch = old + 36 != slot;
-                }
-                if (shouldSwitch) {
-                    if (this.hotBar.getValue()) {
-                        InventoryUtil.switchToSlot(slot);
-                    } else {
-                        PacketMine.mc.interactionManager.clickSlot(PacketMine.mc.player.currentScreenHandler.syncId, slot, old, SlotActionType.SWAP, (PlayerEntity)PacketMine.mc.player);
-                    }
-                }
-                int finalSlot = slot;
-                this.switchBack = () -> {
-                    if (this.endRotate.getValue() && !this.faceVector(this.breakPos.toCenterPos().offset(BlockUtil.getClickSide(this.breakPos), 0.5))) {
-                        if (shouldSwitch) {
-                            if (this.hotBar.getValue()) {
-                                InventoryUtil.switchToSlot(old);
-                            } else {
-                                PacketMine.mc.interactionManager.clickSlot(PacketMine.mc.player.currentScreenHandler.syncId, finalSlot, old, SlotActionType.SWAP, (PlayerEntity)PacketMine.mc.player);
-                                EntityUtil.syncInventory();
-                            }
-                        }
-                        return;
-                    }
-                    PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, BlockUtil.getClickSide(this.breakPos), id));
-                    if (this.endSwing.getValue()) {
-                        EntityUtil.swingHand(Hand.MAIN_HAND, this.swingMode.getValue());
-                    }
-                    if (shouldSwitch) {
-                        if (this.hotBar.getValue()) {
-                            InventoryUtil.switchToSlot(old);
-                        } else {
-                            PacketMine.mc.interactionManager.clickSlot(PacketMine.mc.player.currentScreenHandler.syncId, finalSlot, old, SlotActionType.SWAP, (PlayerEntity)PacketMine.mc.player);
-                            EntityUtil.syncInventory();
-                        }
-                    }
-                    ++this.breakNumber;
-                    this.delayTimer.reset();
-                    this.startTime.reset();
-                    if (this.setAir.getValue()) {
-                        PacketMine.mc.world.setBlockState(this.breakPos, Blocks.AIR.getDefaultState());
-                    }
-                    if (this.endRotate.getValue() && !this.shouldYawStep()) {
-                        Astra.ROTATION.snapBack();
-                    }
-                    ghost = true;
-                };
-                this.switchBack.run();
-                this.switchBack = null;
-            }
-        } else {
-            if (!this.startTime.passed(this.startDelay.getValueInt())) {
-                return;
-            }
-            if (!this.mineAir.getValue() && this.isAir(this.breakPos)) {
-                return;
-            }
-            Direction side = BlockUtil.getClickSide(this.breakPos);
-            if (this.rotate.getValue()) {
-                Vec3i vec3i = side.getVector();
-                if (!this.faceVector(this.breakPos.toCenterPos().add(new Vec3d((double)vec3i.getX() * 0.5, (double)vec3i.getY() * 0.5, (double)vec3i.getZ() * 0.5)))) {
-                    return;
-                }
-            }
-            this.mineTimer.reset();
-            this.animationTime.reset();
-            if (this.swing.getValue()) {
-                EntityUtil.swingHand(Hand.MAIN_HAND, this.swingMode.getValue());
-            }
-            if (this.doubleBreak.getValue()) {
-                if (secondPos == null || this.isAir(secondPos)) {
-                    double breakTime = this.getBreakTime(this.breakPos, slot, 1.0);
-                    this.secondAnim.reset();
-                    this.secondAnim.setLength((long)breakTime);
-                    this.secondTimer.reset();
-                    secondPos = this.breakPos;
-                }
-            }
-            PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.breakPos, side, id));
-            if (this.fastBypass.getValue()) {
-                this.sendFastBypassPackets();
-            }
-            if (this.rotate.getValue() && !this.shouldYawStep()) {
-                Astra.ROTATION.snapBack();
-            }
-            this.startTime.reset();
         }
     }
 
-    private void breakBlock(BlockPos breakPos) {
-        PacketMine.mc.world.getBlockState(breakPos).getBlock().onBreak((World)PacketMine.mc.world, breakPos, PacketMine.mc.world.getBlockState(breakPos), (PlayerEntity)PacketMine.mc.player);
-    }
-
-    void doDoubleBreak(Direction side) {
-        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.breakPos, side, id));
-        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, side, id));
-    }
-
-    // ⚠️ @EventListener，不能加 @Nativeify
-    @EventListener
-    public void onAttackBlock(ClickBlockEvent event) {
-        int slot;
-        if (PacketMine.nullCheck()) {
-            return;
-        }
-        if (PacketMine.mc.player.isCreative()) {
-            return;
-        }
-        event.cancel();
-        BlockPos pos = event.getPos();
-        if (pos.equals((Object)this.breakPos)) {
-            return;
-        }
-        if (PacketMine.unbreakable(pos)) {
-            return;
-        }
-        if (BlockUtil.getClickSideStrict(pos) == null) {
-            return;
-        }
-        if ((double)MathHelper.sqrt((float)((float)PacketMine.mc.player.getEyePos().squaredDistanceTo(pos.toCenterPos()))) > this.range.getValue()) {
-            return;
-        }
-
-        if (this.breakPos != null && this.startPacket) {
-            Direction oldSide = BlockUtil.getClickSide(this.breakPos);
-            if (oldSide != null) {
-                PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, oldSide, id));
-            }
-            this.startPacket = false;
-            ghost = false;
-            complete = false;
-        }
-
-        this.breakPos = pos;
+    @Nativeify
+    private void resetMiningState() {
         this.breakNumber = 0;
         this.startPacket = false;
         ghost = false;
         complete = false;
-        this.mineTimer.reset();
-        this.animationTime.reset();
-        this.startTime.reset();
+        this.breakPos = null;
+        progress = 0.0;
+    }
 
-        if (Blink.INSTANCE.isOn() && Blink.INSTANCE.pauseModule.getValue()) {
+    @Nativeify
+    private boolean shouldAbortMining() {
+        // 超过最大挖掘次数
+        if ((double) this.breakNumber > this.maxBreak.getValue() - 1.0
+                && this.maxBreak.getValue() > 0.0
+                && !complete) {
+            this.abortCurrentMining();
+            return true;
+        }
+        // 不等待且空气
+        if (!this.wait.getValue()
+                && this.isAir(this.breakPos)
+                && !this.instant.getValue()) {
+            this.abortCurrentMining();
+            return true;
+        }
+        return false;
+    }
+
+    @Nativeify
+    private void abortCurrentMining() {
+        if (this.breakPos.equals(secondPos)) secondPos = null;
+        this.startPacket = false;
+        ghost = false;
+        complete = false;
+        this.breakNumber = 0;
+        this.breakPos = null;
+    }
+
+    @Nativeify
+    private void handleUnbreakable() {
+        if (this.unbreakableCancel.getValue()) {
+            this.breakPos = null;
+            this.startPacket = false;
+            ghost = false;
+            complete = false;
+        }
+        this.breakNumber = 0;
+    }
+
+    @Nativeify
+    private boolean passPreconditionChecks(PlayerEntity player) {
+        if (MathHelper.sqrt((float) player.getEyePos().squaredDistanceTo(this.breakPos.toCenterPos())) > this.range.getValue()) return false;
+        if (this.usingPause.getValue() && player.isUsingItem()
+                && (!this.allowOffhand.getValue() || player.getActiveHand() == Hand.MAIN_HAND)) return false;
+        if (Blink.INSTANCE.isOn() && Blink.INSTANCE.pauseModule.getValue()) return false;
+        if (this.breakPos.equals(AutoAnchor.INSTANCE.currentPos)
+                && BlockUtil.getBlock(this.breakPos) instanceof RespawnAnchorBlock) return false;
+        if (!this.hotBar.getValue() && !EntityUtil.inInventory()) return false;
+        if (!this.delayTimer.passed((long) this.stopDelay.getValue())) return false;
+        return true;
+    }
+
+    @Nativeify
+    private void executeStopPacket(PlayerEntity player, int slot) {
+        if (this.isAir(this.breakPos)) return;
+        if (!this.mineTimer.passed((long) this.breakFinalTime)) return;
+
+        if (this.endRotate.getValue() && this.shouldYawStep()
+                && !this.faceVector(this.breakPos.toCenterPos().offset(BlockUtil.getClickSide(this.breakPos), 0.5))) {
             return;
         }
+
+        int old = player.getInventory().selectedSlot;
+        int targetSlot = slot;
+        boolean shouldSwitch;
+        if (this.hotBar.getValue()) {
+            shouldSwitch = targetSlot != old;
+        } else {
+            if (targetSlot < 9) targetSlot += 36;
+            shouldSwitch = old + 36 != targetSlot;
+        }
+
+        if (shouldSwitch) {
+            if (this.hotBar.getValue()) {
+                InventoryUtil.switchToSlot(targetSlot);
+            } else {
+                mc.interactionManager.clickSlot(player.currentScreenHandler.syncId, targetSlot, old, SlotActionType.SWAP, player);
+            }
+        }
+
+        this.doStopPacket(player, old, targetSlot, shouldSwitch);
+    }
+
+    @Nativeify
+    private void doStopPacket(PlayerEntity player, int old, int finalSlot, boolean shouldSwitch) {
+        // 二次旋转校验，失败则回滚槽位
+        if (this.endRotate.getValue()
+                && !this.faceVector(this.breakPos.toCenterPos().offset(BlockUtil.getClickSide(this.breakPos), 0.5))) {
+            if (shouldSwitch) {
+                if (this.hotBar.getValue()) {
+                    InventoryUtil.switchToSlot(old);
+                } else {
+                    mc.interactionManager.clickSlot(player.currentScreenHandler.syncId, finalSlot, old, SlotActionType.SWAP, player);
+                    EntityUtil.syncInventory();
+                }
+            }
+            return;
+        }
+
+        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos,
+                BlockUtil.getClickSide(this.breakPos), id));
+
+        if (this.endSwing.getValue()) {
+            EntityUtil.swingHand(Hand.MAIN_HAND, this.swingMode.getValue());
+        }
+        if (shouldSwitch) {
+            if (this.hotBar.getValue()) {
+                InventoryUtil.switchToSlot(old);
+            } else {
+                mc.interactionManager.clickSlot(player.currentScreenHandler.syncId, finalSlot, old, SlotActionType.SWAP, player);
+                EntityUtil.syncInventory();
+            }
+        }
+
+        ++this.breakNumber;
+        this.delayTimer.reset();
+        this.startTime.reset();
+
+        if (this.setAir.getValue()) {
+            mc.world.setBlockState(this.breakPos, Blocks.AIR.getDefaultState());
+        }
+        if (this.endRotate.getValue() && !this.shouldYawStep()) {
+            Astra.ROTATION.snapBack();
+        }
+        ghost = true;
+    }
+
+    @Nativeify
+    private void executeStartPacket(PlayerEntity player, int slot) {
+        if (!this.startTime.passed(this.startDelay.getValueInt())) return;
+        if (!this.mineAir.getValue() && this.isAir(this.breakPos)) return;
+
         Direction side = BlockUtil.getClickSide(this.breakPos);
         if (this.rotate.getValue()) {
             Vec3i vec3i = side.getVector();
-            if (!this.faceVector(this.breakPos.toCenterPos().add(new Vec3d((double)vec3i.getX() * 0.5, (double)vec3i.getY() * 0.5, (double)vec3i.getZ() * 0.5)))) {
+            if (!this.faceVector(this.breakPos.toCenterPos().add(new Vec3d(
+                    vec3i.getX() * 0.5, vec3i.getY() * 0.5, vec3i.getZ() * 0.5)))) {
                 return;
             }
         }
-        if (!this.startTime.passed(this.startDelay.getValueInt())) {
-            return;
-        }
+
+        this.mineTimer.reset();
+        this.animationTime.reset();
+
         if (this.swing.getValue()) {
             EntityUtil.swingHand(Hand.MAIN_HAND, this.swingMode.getValue());
         }
-        if (this.doubleBreak.getValue()) {
-            if (secondPos == null || this.isAir(secondPos)) {
-                int slot2 = this.getTool(this.breakPos);
-                if (slot2 == -1) {
-                    slot2 = PacketMine.mc.player.getInventory().selectedSlot;
-                }
-                this.secondFinalTime = this.getBreakTime(this.breakPos, slot2, 1.0);
-                this.secondAnim.reset();
-                this.secondAnim.setLength((long)this.secondFinalTime);
-                this.secondTimer.reset();
-                secondPos = this.breakPos;
-            }
+
+        if (this.doubleBreak.getValue() && (secondPos == null || this.isAir(secondPos))) {
+            double breakTime = this.getBreakTime(this.breakPos, slot, 1.0);
+            this.secondAnim.reset();
+            this.secondAnim.setLength((long) breakTime);
+            this.secondTimer.reset();
+            secondPos = this.breakPos;
         }
-        if ((slot = this.getTool(this.breakPos)) == -1) {
-            slot = PacketMine.mc.player.getInventory().selectedSlot;
-        }
-        this.breakFinalTime = this.getBreakTime(this.breakPos, slot);
-        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.breakPos, side, id));
+
+        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.breakPos, side, id));
+
         if (this.fastBypass.getValue()) {
             this.sendFastBypassPackets();
         }
@@ -508,40 +469,134 @@ public class PacketMine extends Module {
         this.startTime.reset();
     }
 
-    public void mine(BlockPos pos) {
-        if (PacketMine.nullCheck()) {
-            return;
-        }
-        if (PacketMine.mc.player.isCreative()) {
-            PacketMine.mc.interactionManager.attackBlock(pos, BlockUtil.getClickSide(pos));
-            return;
-        }
-        if (this.isOff()) {
-            PacketMine.mc.interactionManager.attackBlock(pos, BlockUtil.getClickSide(pos));
-            return;
-        }
-        if (pos.equals((Object)this.breakPos)) {
-            return;
-        }
-        if (PacketMine.unbreakable(pos)) {
-            return;
-        }
-        if (BlockUtil.getClickSideStrict(pos) == null) {
-            return;
-        }
-        if ((double)MathHelper.sqrt((float)((float)PacketMine.mc.player.getEyePos().squaredDistanceTo(pos.toCenterPos()))) > this.range.getValue()) {
-            return;
+    // ==================== onAttackBlock：调度 ====================
+    // ⚠️ @EventListener，不能加 @Nativeify
+    @EventListener
+    public void onAttackBlock(ClickBlockEvent event) {
+        if (PacketMine.nullCheck()) return;
+        PlayerEntity player = mc.player;
+        if (player == null || mc.world == null) return;
+        if (player.isCreative()) return;
+
+        event.cancel();
+        BlockPos pos = event.getPos();
+
+        if (!this.isValidAttackTarget(player, pos)) return;
+
+        this.cancelPreviousPacket();
+        this.resetAttackState(pos);
+
+        if (Blink.INSTANCE.isOn() && Blink.INSTANCE.pauseModule.getValue()) return;
+
+        Direction side = BlockUtil.getClickSide(this.breakPos);
+        if (this.rotate.getValue()) {
+            Vec3i vec3i = side.getVector();
+            if (!this.faceVector(this.breakPos.toCenterPos().add(new Vec3d(
+                    vec3i.getX() * 0.5, vec3i.getY() * 0.5, vec3i.getZ() * 0.5)))) {
+                return;
+            }
         }
 
+        if (!this.startTime.passed(this.startDelay.getValueInt())) return;
+        if (this.swing.getValue()) {
+            EntityUtil.swingHand(Hand.MAIN_HAND, this.swingMode.getValue());
+        }
+
+        this.prepareDoubleBreak(player);
+
+        int slot = this.getTool(this.breakPos);
+        if (slot == -1) slot = player.getInventory().selectedSlot;
+        this.breakFinalTime = this.getBreakTime(this.breakPos, slot);
+
+        this.sendStartPacket(side);
+    }
+
+    // ==================== onAttackBlock 拆分出来的 @Nativeify 方法 ====================
+
+    @Nativeify
+    private boolean isValidAttackTarget(PlayerEntity player, BlockPos pos) {
+        if (pos.equals(this.breakPos)) return false;
+        if (PacketMine.unbreakable(pos)) return false;
+        if (BlockUtil.getClickSideStrict(pos) == null) return false;
+        if (MathHelper.sqrt((float) player.getEyePos().squaredDistanceTo(pos.toCenterPos())) > this.range.getValue()) return false;
+        return true;
+    }
+
+    @Nativeify
+    private void cancelPreviousPacket() {
         if (this.breakPos != null && this.startPacket) {
             Direction oldSide = BlockUtil.getClickSide(this.breakPos);
             if (oldSide != null) {
-                PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, oldSide, id));
+                PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, oldSide, id));
             }
             this.startPacket = false;
             ghost = false;
             complete = false;
         }
+    }
+
+    @Nativeify
+    private void resetAttackState(BlockPos pos) {
+        this.breakPos = pos;
+        this.breakNumber = 0;
+        this.startPacket = false;
+        ghost = false;
+        complete = false;
+        this.mineTimer.reset();
+        this.animationTime.reset();
+        this.startTime.reset();
+    }
+
+    @Nativeify
+    private void prepareDoubleBreak(PlayerEntity player) {
+        if (!this.doubleBreak.getValue()) return;
+        if (secondPos != null && !this.isAir(secondPos)) return;
+
+        int slot2 = this.getTool(this.breakPos);
+        if (slot2 == -1) slot2 = player.getInventory().selectedSlot;
+
+        this.secondFinalTime = this.getBreakTime(this.breakPos, slot2, 1.0);
+        this.secondAnim.reset();
+        this.secondAnim.setLength((long) this.secondFinalTime);
+        this.secondTimer.reset();
+        secondPos = this.breakPos;
+    }
+
+    @Nativeify
+    private void sendStartPacket(Direction side) {
+        PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.breakPos, side, id));
+
+        if (this.fastBypass.getValue()) {
+            this.sendFastBypassPackets();
+        }
+        if (this.rotate.getValue() && !this.shouldYawStep()) {
+            Astra.ROTATION.snapBack();
+        }
+        this.startTime.reset();
+    }
+
+    // ==================== 公共 API ====================
+
+    public void mine(BlockPos pos) {
+        if (PacketMine.nullCheck()) return;
+        PlayerEntity player = mc.player;
+        if (player == null || mc.world == null) return;
+        if (player.isCreative()) {
+            mc.interactionManager.attackBlock(pos, BlockUtil.getClickSide(pos));
+            return;
+        }
+        if (this.isOff()) {
+            mc.interactionManager.attackBlock(pos, BlockUtil.getClickSide(pos));
+            return;
+        }
+        if (pos.equals(this.breakPos)) return;
+        if (PacketMine.unbreakable(pos)) return;
+        if (BlockUtil.getClickSideStrict(pos) == null) return;
+        if (MathHelper.sqrt((float) player.getEyePos().squaredDistanceTo(pos.toCenterPos())) > this.range.getValue()) return;
+
+        this.cancelPreviousPacket();
 
         this.breakPos = pos;
         this.breakNumber = 0;
@@ -557,7 +612,8 @@ public class PacketMine extends Module {
         if (this.breakPos != null && this.startPacket) {
             Direction oldSide = BlockUtil.getClickSide(this.breakPos);
             if (oldSide != null) {
-                sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, oldSide, id));
+                sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.breakPos, oldSide, id));
             }
             this.startPacket = false;
             ghost = false;
@@ -566,16 +622,22 @@ public class PacketMine extends Module {
         this.breakPos = null;
     }
 
+    @Nativeify
     private void sendFastBypassPackets() {
+        if (this.breakPos == null) return;
         BlockPos highPos = new BlockPos(this.breakPos.getX(), 400, this.breakPos.getZ());
         for (int i = 0; i < 3; i++) {
             final int heightOffset = i * 10;
             Direction[] directions = Direction.values();
             Direction randomDir = directions[(int) (Math.random() * directions.length)];
-            PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, highPos.up(heightOffset), randomDir, id));
+            PacketMine.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, highPos.up(heightOffset), randomDir, id));
         }
     }
 
+    // ==================== 工具方法 ====================
+
+    @Nativeify
     boolean faceVector(Vec3d directionVec) {
         if (!this.shouldYawStep()) {
             Astra.ROTATION.lookAt(directionVec);
@@ -589,21 +651,35 @@ public class PacketMine extends Module {
         return !this.checkFov.getValue();
     }
 
+    @Nativeify
+    private static int getEfficiencyLevel(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return 0;
+        if (PacketMine.mc.world == null) return 0;
+        RegistryEntry<Enchantment> entry = PacketMine.mc.world.getRegistryManager()
+                .get(Enchantments.EFFICIENCY.getRegistryRef())
+                .getEntry(Enchantments.EFFICIENCY)
+                .orElseThrow();
+        return EnchantmentHelper.getLevel(entry, stack);
+    }
+
+    // ==================== 渲染 ====================
+
     // ⚠️ @Override 渲染，每帧调用，不能加 @Nativeify
     @Override
     public void onRender3D(MatrixStack matrixStack) {
-        if (this.breakPos != null && PacketMine.mc.world.isAir(this.breakPos)) {
+        if (mc.player == null || mc.world == null) return;
+        if (this.breakPos != null && mc.world.isAir(this.breakPos)) {
             complete = true;
         }
-        if (!PacketMine.mc.player.isCreative()) {
+        if (!mc.player.isCreative()) {
             double ease;
             if (secondPos != null) {
                 if (this.isAir(secondPos)) {
                     secondPos = null;
                     return;
                 }
-                if (!this.checkDouble.getValue() || !secondPos.equals((Object)this.breakPos)) {
-                    this.secondAnim.setLength((long)this.secondFinalTime);
+                if (!this.checkDouble.getValue() || !secondPos.equals(this.breakPos)) {
+                    this.secondAnim.setLength((long) this.secondFinalTime);
                     ease = this.secondAnim.ease(this.ease.getValue());
                     if (this.box.getValue()) {
                         Render3DUtil.drawFill(matrixStack, this.getFillBox(secondPos, ease), this.doubleColor.getValue());
@@ -614,8 +690,8 @@ public class PacketMine extends Module {
                 }
             }
             if (this.breakPos != null) {
-                progress = (double)this.mineTimer.getMs() / this.breakFinalTime;
-                this.animationTime.setLength((long)this.breakFinalTime);
+                progress = (double) this.mineTimer.getMs() / this.breakFinalTime;
+                this.animationTime.setLength((long) this.breakFinalTime);
                 ease = this.animationTime.ease(this.ease.getValue());
                 if (PacketMine.unbreakable(this.breakPos)) {
                     if (this.box.getValue()) {
@@ -635,7 +711,7 @@ public class PacketMine extends Module {
                 if (this.text.getValue()) {
                     if (this.isAir(this.breakPos)) {
                         Render3DUtil.drawText3D("Waiting", this.breakPos.toCenterPos(), -1);
-                    } else if ((double)((int)this.mineTimer.getMs()) < this.breakFinalTime) {
+                    } else if ((double) ((int) this.mineTimer.getMs()) < this.breakFinalTime) {
                         Render3DUtil.drawText3D(this.df.format(progress * 100.0) + "%", this.breakPos.toCenterPos(), -1);
                     } else {
                         Render3DUtil.drawText3D("100.0%", this.breakPos.toCenterPos(), -1);
@@ -649,112 +725,102 @@ public class PacketMine extends Module {
         }
     }
 
-    // ==================== 核心算法 1：Fill 渲染盒计算 ====================
-    // ✅ 加 @Nativeify：switch + Box 几何
-    //    逆向者看不到"每种动画模式的几何变换"
+    @Nativeify
     private Box getFillBox(BlockPos pos, double ease) {
         switch (this.animation.getValue().ordinal()) {
-            case 0: // Center
+            case 0:
                 ease = (1.0 - ease) / 2.0;
                 return new Box(pos).shrink(ease, ease, ease).shrink(-ease, -ease, -ease);
-            case 1: // Grow
+            case 1:
                 ease = (1.0 - ease) / 2.0;
                 return new Box(pos).shrink(ease, 0.0, ease).shrink(-ease, 0.0, -ease);
-            case 2: // Down
-                return new Box((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(),
-                        (double)(pos.getX() + 1), (double)pos.getY() + ease, (double)(pos.getZ() + 1));
-            case 3: // Up
-                return new Box((double)pos.getX(), (double)(pos.getY() + 1) - ease, (double)pos.getZ(),
-                        (double)(pos.getX() + 1), (double)(pos.getY() + 1), (double)(pos.getZ() + 1));
-            case 4: // Oscillation
+            case 2:
+                return new Box(pos.getX(), pos.getY(), pos.getZ(),
+                        pos.getX() + 1, pos.getY() + ease, pos.getZ() + 1);
+            case 3:
+                return new Box(pos.getX(), pos.getY() + 1 - ease, pos.getZ(),
+                        pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+            case 4:
                 return new Box(pos).shrink(ease, ease, ease).shrink(-ease, -ease, -ease);
             default:
                 return new Box(pos);
         }
     }
 
-    // ==================== 核心算法 2：Outline 渲染盒计算 ====================
-    // ✅ 加 @Nativeify：switch + expandLine + Box 几何
+    @Nativeify
     private Box getOutlineBox(BlockPos pos, double ease) {
         ease = Math.min(ease + this.expandLine.getValue(), 1.0);
         switch (this.animation.getValue().ordinal()) {
-            case 0: // Center
+            case 0:
                 ease = (1.0 - ease) / 2.0;
                 return new Box(pos).shrink(ease, ease, ease).shrink(-ease, -ease, -ease);
-            case 1: // Grow
+            case 1:
                 ease = (1.0 - ease) / 2.0;
                 return new Box(pos).shrink(ease, 0.0, ease).shrink(-ease, 0.0, -ease);
-            case 2: // Down
-                return new Box((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(),
-                        (double)(pos.getX() + 1), (double)pos.getY() + ease, (double)(pos.getZ() + 1));
-            case 3: // Up
-                return new Box((double)pos.getX(), (double)(pos.getY() + 1) - ease, (double)pos.getZ(),
-                        (double)(pos.getX() + 1), (double)(pos.getY() + 1), (double)(pos.getZ() + 1));
-            case 4: // Oscillation
+            case 2:
+                return new Box(pos.getX(), pos.getY(), pos.getZ(),
+                        pos.getX() + 1, pos.getY() + ease, pos.getZ() + 1);
+            case 3:
+                return new Box(pos.getX(), pos.getY() + 1 - ease, pos.getZ(),
+                        pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+            case 4:
                 return new Box(pos).shrink(ease, ease, ease).shrink(-ease, -ease, -ease);
             default:
                 return new Box(pos);
         }
     }
 
-    @EventListener(priority=-200)
+    // ==================== 发包 ====================
+
+    // ⚠️ @EventListener
+    @EventListener(priority = -200)
     public void onPacketSend(PacketEvent.Send event) {
-        if (PacketMine.nullCheck() || PacketMine.mc.player.isCreative()) {
-            return;
-        }
+        if (PacketMine.nullCheck()) return;
+        PlayerEntity player = mc.player;
+        if (player == null || mc.world == null) return;
+        if (player.isCreative()) return;
+
         if (event.getPacket() instanceof PlayerMoveC2SPacket) {
-            // ===== 用 shouldBypassGround() 替代原来的内联判断 =====
             this.sendGroundPacket = this.shouldBypassGround();
             if (this.sendGroundPacket) {
                 ((IPlayerMoveC2SPacket) event.getPacket()).setOnGround(true);
             }
         } else {
             Packet<?> packet = event.getPacket();
-            if (packet instanceof UpdateSelectedSlotC2SPacket) {
-                UpdateSelectedSlotC2SPacket packet2 = (UpdateSelectedSlotC2SPacket) packet;
+            if (packet instanceof UpdateSelectedSlotC2SPacket packet2) {
                 if (packet2.getSelectedSlot() != this.lastSlot) {
                     this.lastSlot = packet2.getSelectedSlot();
                 }
             } else {
                 packet = event.getPacket();
-                if (packet instanceof PlayerActionC2SPacket) {
-                    // ===== 用 handlePlayerAction() 替代原来的内联判断 =====
-                    this.handlePlayerAction((PlayerActionC2SPacket) packet);
+                if (packet instanceof PlayerActionC2SPacket action) {
+                    this.handlePlayerAction(action);
                 }
             }
         }
     }
 
-    // ==================== 核心算法 1：BypassGround 判断 ====================
-    // ✅ 加 @Nativeify：多条件 + 距离计算 + 时间判断
-    //    逆向者看不到"何时伪造 onGround 包"的绕过策略
     @Nativeify
     private boolean shouldBypassGround() {
+        if (mc.player == null || mc.world == null) return false;
         if (!this.bypassGround.getValue()) return false;
-        if (PacketMine.mc.player.isFallFlying()) return false;
+        if (mc.player.isFallFlying()) return false;
         if (this.breakPos == null) return false;
         if (this.isAir(this.breakPos)) return false;
         if (this.bypassTime.getValue() <= 0.0) return false;
-        if (MathHelper.sqrt((float) ((float) this.breakPos.toCenterPos().squaredDistanceTo(PacketMine.mc.player.getEyePos()))) > this.range.getValueFloat() + 2.0f) return false;
+        if (MathHelper.sqrt((float) this.breakPos.toCenterPos().squaredDistanceTo(mc.player.getEyePos())) > this.range.getValueFloat() + 2.0f) return false;
 
         double breakTime = this.breakFinalTime - this.bypassTime.getValue();
         return breakTime <= 0.0 || this.mineTimer.passed((long) breakTime);
     }
 
-    // ==================== 核心算法 2：挖掘包处理 ====================
-    // ✅ 加 @Nativeify：START/STOP 动作分发 + 位置匹配
-    //    逆向者看不到"何时设置 startPacket/ghost/complete"的状态切换
     @Nativeify
     private void handlePlayerAction(PlayerActionC2SPacket packet3) {
         if (packet3.getAction() == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
-            if (this.breakPos == null || !packet3.getPos().equals(this.breakPos)) {
-                return;
-            }
+            if (this.breakPos == null || !packet3.getPos().equals(this.breakPos)) return;
             this.startPacket = true;
         } else if (packet3.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
-            if (this.breakPos == null || !packet3.getPos().equals(this.breakPos)) {
-                return;
-            }
+            if (this.breakPos == null || !packet3.getPos().equals(this.breakPos)) return;
             if (!this.instant.getValue()) {
                 this.startPacket = false;
                 ghost = false;
@@ -763,7 +829,10 @@ public class PacketMine extends Module {
         }
     }
 
+    // ==================== 挖掘速度计算 ====================
+
     public static double getBreakTime(BlockPos pos) {
+        if (INSTANCE == null || PacketMine.mc.player == null) return 0.0;
         int slot = INSTANCE.getTool(pos);
         if (slot == -1) {
             slot = PacketMine.mc.player.getInventory().selectedSlot;
@@ -775,57 +844,68 @@ public class PacketMine extends Module {
         return this.getBreakTime(pos, slot, this.damage.getValue());
     }
 
+    @Nativeify
     double getBreakTime(BlockPos pos, int slot, double damage) {
-        return (double)(1.0f / this.getBlockStrength(pos, PacketMine.mc.player.getInventory().getStack(slot)) / 20.0f * 1000.0f) * damage;
+        if (mc.player == null || mc.world == null) return 0.0;
+        return (double) (1.0f / this.getBlockStrength(pos, mc.player.getInventory().getStack(slot)) / 20.0f * 1000.0f) * damage;
     }
 
-    // ==================== 核心算法 3：方块硬度 ====================
-    // ✅ 加 @Nativeify：硬度获取 + 工具适配
     @Nativeify
     float getBlockStrength(BlockPos position, ItemStack itemStack) {
-        BlockState state = PacketMine.mc.world.getBlockState(position);
-        float hardness = state.getHardness((BlockView)PacketMine.mc.world, position);
-        if (hardness < 0.0f) {
-            return 0.0f;
-        }
+        if (mc.player == null || mc.world == null) return 0.0f;
+        BlockState state = mc.world.getBlockState(position);
+        float hardness = state.getHardness(mc.world, position);
+        if (hardness < 0.0f) return 0.0f;
         float i = !state.isToolRequired() || itemStack.isSuitableFor(state) ? 30.0f : 100.0f;
         return this.getDigSpeed(state, itemStack) / hardness / i;
     }
 
-    // ==================== 核心算法 4：挖掘速度（最关键） ====================
-    // ✅ 加 @Nativeify：附魔 + 药水效果 + 水下 + 地面惩罚
-    //    逆向者看不到"完整挖掘速度公式"
     @Nativeify
     float getDigSpeed(BlockState state, ItemStack itemStack) {
-        boolean inWeb;
-        int efficiencyModifier;
+        if (mc.player == null || mc.world == null) return 0.0f;
+
         float digSpeed = this.getDestroySpeed(state, itemStack);
-        if (digSpeed > 1.0f && (efficiencyModifier = EnchantmentHelper.getLevel((RegistryEntry)((RegistryEntry)PacketMine.mc.world.getRegistryManager().get(Enchantments.EFFICIENCY.getRegistryRef()).getEntry(Enchantments.EFFICIENCY).get()), (ItemStack)itemStack)) > 0 && !itemStack.isEmpty()) {
-            digSpeed += (float)(StrictMath.pow(efficiencyModifier, 2.0) + 1.0);
+        if (digSpeed > 1.0f) {
+            int efficiencyModifier = getEfficiencyLevel(itemStack);
+            if (efficiencyModifier > 0 && !itemStack.isEmpty()) {
+                digSpeed += (float) (StrictMath.pow(efficiencyModifier, 2.0) + 1.0);
+            }
         }
-        if (PacketMine.mc.player.hasStatusEffect(StatusEffects.HASTE)) {
-            digSpeed *= 1.0f + (float)(PacketMine.mc.player.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1) * 0.2f;
+
+        StatusEffectInstance haste = mc.player.getStatusEffect(StatusEffects.HASTE);
+        if (haste != null) {
+            digSpeed *= 1.0f + (float) (haste.getAmplifier() + 1) * 0.2f;
         }
-        if (PacketMine.mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
-            digSpeed *= (switch (PacketMine.mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+
+        StatusEffectInstance fatigue = mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE);
+        if (fatigue != null) {
+            digSpeed *= switch (fatigue.getAmplifier()) {
                 case 0 -> 0.3f;
                 case 1 -> 0.09f;
                 case 2 -> 0.0027f;
                 default -> 8.1E-4f;
-            });
+            };
         }
-        if (PacketMine.mc.player.isSubmergedInWater()) {
-            digSpeed *= (float)PacketMine.mc.player.getAttributeInstance(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED).getValue();
+
+        if (mc.player.isSubmergedInWater()) {
+            digSpeed *= (float) mc.player.getAttributeInstance(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED).getValue();
         }
-        boolean bl = inWeb = this.checkWeb.getValue() && Astra.PLAYER.isInWeb((PlayerEntity)PacketMine.mc.player) && PacketMine.mc.world.getBlockState(this.breakPos).getBlock() == Blocks.COBWEB;
-        if ((!PacketMine.mc.player.isOnGround() || inWeb) && PacketMine.INSTANCE.checkGround.getValue() && (Criticals.INSTANCE.mode.is(Criticals.Mode.Ground) && Criticals.INSTANCE.isOn() || PacketMine.mc.player.isFallFlying() || inWeb)) {
+
+        boolean inWeb = this.checkWeb.getValue()
+                && Astra.PLAYER.isInWeb(mc.player)
+                && this.breakPos != null
+                && mc.world.getBlockState(this.breakPos).getBlock() == Blocks.COBWEB;
+
+        if ((!mc.player.isOnGround() || inWeb)
+                && PacketMine.INSTANCE.checkGround.getValue()
+                && (Criticals.INSTANCE.mode.is(Criticals.Mode.Ground) && Criticals.INSTANCE.isOn()
+                || mc.player.isFallFlying()
+                || inWeb)) {
             digSpeed /= 5.0f;
         }
-        return digSpeed < 0.0f ? 0.0f : digSpeed;
+        return Math.max(digSpeed, 0.0f);
     }
 
-    // ==================== 核心算法 5：工具破坏速度 ====================
-    // ✅ 加 @Nativeify：基础破坏速度 × 工具效率
     @Nativeify
     float getDestroySpeed(BlockState state, ItemStack itemStack) {
         float destroySpeed = 1.0f;
@@ -835,8 +915,8 @@ public class PacketMine extends Module {
         return destroySpeed;
     }
 
-    // ==================== 核心算法 6：颜色插值 ====================
-    // ✅ 加 @Nativeify：RGBA 线性插值
+    // ==================== 渲染颜色 ====================
+
     @Nativeify
     Color getColor(double quad) {
         int sR = this.startColor.getValue().getRed();
@@ -847,11 +927,13 @@ public class PacketMine extends Module {
         int eG = this.endColor.getValue().getGreen();
         int eB = this.endColor.getValue().getBlue();
         int eA = this.endColor.getValue().getAlpha();
-        return new Color((int)((double)sR + (double)(eR - sR) * quad), (int)((double)sG + (double)(eG - sG) * quad), (int)((double)sB + (double)(eB - sB) * quad), (int)((double)sA + (double)(eA - sA) * quad));
+        return new Color(
+                (int) (sR + (double) (eR - sR) * quad),
+                (int) (sG + (double) (eG - sG) * quad),
+                (int) (sB + (double) (eB - sB) * quad),
+                (int) (sA + (double) (eA - sA) * quad));
     }
 
-    // ==================== 核心算法 7：轮廓颜色插值 ====================
-    // ✅ 加 @Nativeify：RGBA 线性插值
     @Nativeify
     Color getOutlineColor(double quad) {
         int sR = this.startOutlineColor.getValue().getRed();
@@ -862,56 +944,67 @@ public class PacketMine extends Module {
         int eG = this.endOutlineColor.getValue().getGreen();
         int eB = this.endOutlineColor.getValue().getBlue();
         int eA = this.endOutlineColor.getValue().getAlpha();
-        return new Color((int)((double)sR + (double)(eR - sR) * quad), (int)((double)sG + (double)(eG - sG) * quad), (int)((double)sB + (double)(eB - sB) * quad), (int)((double)sA + (double)(eA - sA) * quad));
+        return new Color(
+                (int) (sR + (double) (eR - sR) * quad),
+                (int) (sG + (double) (eG - sG) * quad),
+                (int) (sB + (double) (eB - sB) * quad),
+                (int) (sA + (double) (eA - sA) * quad));
     }
 
-    // ==================== 核心算法 8：最优工具查找 ====================
-    // ✅ 加 @Nativeify：遍历 + 附魔等级 + 挖掘速度
-    //    逆向者看不到"如何评分工具"
+    // ==================== 工具查找 ====================
+
     @Nativeify
     int getTool(BlockPos pos) {
+        if (mc.player == null || mc.world == null) return -1;
+
         if (this.hotBar.getValue()) {
             int index = -1;
             float CurrentFastest = 1.0f;
             for (int i = 0; i < 9; ++i) {
-                float destroySpeed;
-                float digSpeed;
-                ItemStack stack = PacketMine.mc.player.getInventory().getStack(i);
-                if (stack == ItemStack.EMPTY || !((digSpeed = (float)EnchantmentHelper.getLevel((RegistryEntry)((RegistryEntry)PacketMine.mc.world.getRegistryManager().get(Enchantments.EFFICIENCY.getRegistryRef()).getEntry(Enchantments.EFFICIENCY).get()), (ItemStack)stack)) + (destroySpeed = stack.getMiningSpeedMultiplier(PacketMine.mc.world.getBlockState(pos))) > CurrentFastest)) continue;
+                ItemStack stack = mc.player.getInventory().getStack(i);
+                if (stack == ItemStack.EMPTY) continue;
+                float digSpeed = getEfficiencyLevel(stack);
+                float destroySpeed = stack.getMiningSpeedMultiplier(mc.world.getBlockState(pos));
+                if (digSpeed + destroySpeed <= CurrentFastest) continue;
                 CurrentFastest = digSpeed + destroySpeed;
                 index = i;
             }
             return index;
         }
+
         AtomicInteger slot = new AtomicInteger();
         slot.set(-1);
         float CurrentFastest = 1.0f;
         for (Map.Entry<Integer, ItemStack> entry : InventoryUtil.getInventoryAndHotbarSlots().entrySet()) {
-            float destroySpeed;
-            float digSpeed;
-            if (entry.getValue().getItem() instanceof AirBlockItem || !((digSpeed = (float)EnchantmentHelper.getLevel((RegistryEntry)((RegistryEntry)PacketMine.mc.world.getRegistryManager().get(Enchantments.EFFICIENCY.getRegistryRef()).getEntry(Enchantments.EFFICIENCY).get()), (ItemStack)entry.getValue())) + (destroySpeed = entry.getValue().getMiningSpeedMultiplier(PacketMine.mc.world.getBlockState(pos))) > CurrentFastest)) continue;
+            if (entry.getValue().getItem() instanceof AirBlockItem) continue;
+            float digSpeed = getEfficiencyLevel(entry.getValue());
+            float destroySpeed = entry.getValue().getMiningSpeedMultiplier(mc.world.getBlockState(pos));
+            if (digSpeed + destroySpeed <= CurrentFastest) continue;
             CurrentFastest = digSpeed + destroySpeed;
             slot.set(entry.getKey());
         }
         return slot.get();
     }
 
+    @Nativeify
     private boolean shouldYawStep() {
-        if (!this.whenElytra.getValue() && (PacketMine.mc.player.isFallFlying() || ElytraFly.INSTANCE.isOn() && ElytraFly.INSTANCE.isFallFlying())) {
+        if (mc.player == null) return this.yawStep.getValue();
+        if (!this.whenElytra.getValue()
+                && (mc.player.isFallFlying() || ElytraFly.INSTANCE.isOn() && ElytraFly.INSTANCE.isFallFlying())) {
             return false;
         }
         return this.yawStep.getValue();
     }
 
+    @Nativeify
     boolean isAir(BlockPos breakPos) {
-        return PacketMine.mc.world.isAir(breakPos) || BlockUtil.getBlock(breakPos) == Blocks.FIRE && BlockUtil.hasCrystal(breakPos);
+        if (mc.world == null) return true;
+        return mc.world.isAir(breakPos) || BlockUtil.getBlock(breakPos) == Blocks.FIRE && BlockUtil.hasCrystal(breakPos);
     }
 
-    // ==================== 核心算法 9：不可破坏方块检测 ====================
-    // ✅ 加 @Nativeify：AirBlock 判定 + 硬度检查
-    //    逆向者看不到"hardness == -1 或 100 都算不可破坏"
     @Nativeify
     public static boolean unbreakable(BlockPos blockPos) {
+        if (PacketMine.mc.world == null) return false;
         Block block = PacketMine.mc.world.getBlockState(blockPos).getBlock();
         return !(block instanceof AirBlock) && (block.getHardness() == -1.0f || block.getHardness() == 100.0f);
     }
@@ -922,19 +1015,19 @@ public class PacketMine extends Module {
         complete = false;
     }
 
-    public static enum Page {
+    public enum Page {
         General,
         Check,
         Rotation,
-        Render;
+        Render
     }
 
-    private static enum Animation {
+    private enum Animation {
         Center,
         Grow,
         Up,
         Down,
         Oscillation,
-        None;
+        None
     }
 }

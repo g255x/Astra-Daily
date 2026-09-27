@@ -13,6 +13,12 @@ loom {
     accessWidenerPath = file("src/main/resources/astra.accesswidener")
 }
 
+// 强制使用 gradle.properties 中指定的 JDK，避免系统 PATH 中其他 Java 干扰
+import java.util.Properties
+def _props = new Properties()
+file("gradle.properties").withInputStream { _props.load(it) }
+ext.jdkHome = _props.getProperty('org.gradle.java.home') ?: System.getProperty('java.home')
+
 repositories {
     flatDir {
         dirs 'lib'
@@ -64,13 +70,7 @@ publishing {
 }
 
 // ====================================================================
-//  ProGuard 混淆任务
-//  执行：gradlew proguardObfuscate
-//
-//  关键点：
-//   1. 规则文件内容放在最前面（-keep 规则必须在 -injars 之前）
-//   2. 字典放在最后
-//   3. 不加 -dontshrink（否则 -repackageclasses 不生效）
+//  【第一层】ProGuard 名称混淆
 // ====================================================================
 task proguardObfuscate(type: JavaExec) {
     dependsOn remapJar
@@ -100,7 +100,7 @@ task proguardObfuscate(type: JavaExec) {
 
         def libPaths = new LinkedHashSet<String>()
 
-        def javaHome = System.getProperty('java.home').replace('\\', '/')
+        def javaHome = project.jdkHome.replace('\\', '/')
         libPaths.add("${javaHome}/jmods/java.base.jmod")
         libPaths.add("${javaHome}/jmods/java.desktop.jmod")
         libPaths.add("${javaHome}/jmods/java.net.http.jmod")
@@ -119,23 +119,17 @@ task proguardObfuscate(type: JavaExec) {
             }
         }
 
-        // ===== 关键：规则文件内容放最前面 =====
         def pro = new StringBuilder()
 
-        // 1. 先把规则文件内容全部写入
         pro.append(rulesFile.getText('UTF-8')).append('\n')
-
-        // 2. 然后是输入输出
         pro.append("-injars '${inputJar.absolutePath}'\n")
         pro.append("-outjars '${outputJar.absolutePath}'\n")
         pro.append("-printmapping '${mappingFile.absolutePath}'\n")
 
-        // 3. 库文件
         libPaths.each { path ->
             pro.append("-libraryjars '${path}'\n")
         }
 
-        // 4. 字典放最后
         if (dicFile.exists()) {
             def dicPath = dicFile.absolutePath
             pro.append("-obfuscationdictionary '${dicPath}'\n")
@@ -146,7 +140,6 @@ task proguardObfuscate(type: JavaExec) {
         tempProFile.setText(pro.toString(), 'UTF-8')
 
         println "ProGuard config written to: ${tempProFile.absolutePath}"
-        println "Config size: ${tempProFile.length()} bytes"
         println "Library jars (deduplicated): ${libPaths.size()}"
     }
 
@@ -157,8 +150,7 @@ task proguardObfuscate(type: JavaExec) {
 }
 
 // ====================================================================
-//  J2CC 原生编译任务
-//  执行：gradlew j2ccNative
+//  【第二层】J2CC 原生编译
 // ====================================================================
 task j2ccNative(type: Exec) {
     dependsOn proguardObfuscate
@@ -272,7 +264,7 @@ libraries = [
 
     workingDir = nativesDir
 
-    commandLine 'java',
+    commandLine "${project.jdkHome}/bin/java",
             '-Xms256m',
             '-Xmx2g',
             '-XX:MaxMetaspaceSize=512m',
@@ -281,21 +273,431 @@ libraries = [
 }
 
 // ====================================================================
-//  最终打包
+//  【第三层前置】从 KBox 输入中剥离所有 Mixin 类
+//  KBox 的 Method inlining 会无条件删"未使用"参数
+//  破坏 Mixin @Inject 签名 —— 必须让 KBox 看不到这些类
 // ====================================================================
-task buildProtectedJar(type: Copy) {
+task stripMixins(type: Zip) {
     dependsOn j2ccNative
 
-    def nativeJar = file("${buildDir}/libs/${project.name}-native.jar")
-    def finalDir  = file("${buildDir}/libs/protected")
+    def inputJar  = file("${buildDir}/libs/${project.name}-native.jar")
+    def outputDir = file("${buildDir}/kbox")
 
-    from nativeJar
+    archiveFileName = "input-stripped.jar"
+    destinationDirectory = outputDir
+
+    from zipTree(inputJar)
+
+    // 剥离所有 Mixin 类
+    exclude "dev/Astra/asm/mixins/**"
+
+    doFirst {
+        outputDir.mkdirs()
+        println "=================================================="
+        println " Strip ALL Mixins from KBox input"
+        println "  Input:  ${inputJar.absolutePath}"
+        println "  Output: ${outputDir}/input-stripped.jar"
+        println "=================================================="
+    }
+}
+
+// ====================================================================
+//  【第三层】KBox 控制流混淆 + 字符串加密
+// ====================================================================
+task kboxObfuscate(type: Exec) {
+    dependsOn stripMixins
+
+    def kboxJar     = file("tools/kbox-protector.jar")
+    def inputJar    = file("${buildDir}/kbox/input-stripped.jar")
+    def outputJar   = file("${buildDir}/kbox/output-kbox.jar")
+    def mappingFile = file("${buildDir}/kbox/mapping.txt")
+    def logFile     = file("${buildDir}/kbox/kbox.log")
+
+    doFirst {
+        if (!kboxJar.exists())
+            throw new GradleException("KBox jar not found: ${kboxJar.absolutePath}")
+        if (!inputJar.exists())
+            throw new GradleException("Stripped input jar not found: ${inputJar.absolutePath}")
+
+        outputJar.parentFile.mkdirs()
+        mappingFile.parentFile.mkdirs()
+        logFile.parentFile.mkdirs()
+
+        println "=================================================="
+        println " KBox Obfuscation (Layer 3)"
+        println "  Input:  ${inputJar.absolutePath}"
+        println "  Output: ${outputJar.absolutePath}"
+        println "  Log:    ${logFile.absolutePath}"
+        println "=================================================="
+    }
+
+    def configFile = file("kbox-config.conf")
+
+    commandLine "${project.jdkHome}/bin/java", '-jar', kboxJar.absolutePath,
+            '--input',  inputJar.absolutePath,
+            '--output', outputJar.absolutePath,
+            '--mapping', mappingFile.absolutePath,
+            '--config', configFile.absolutePath,
+            '--mc-preset', 'MIXIN',
+            '-dontobfuscate',
+            '-keep', '@j2cc.Nativeify',
+            '-neverfail', 'true',
+            '--verbose',
+            '--log', logFile.absolutePath
+}
+
+// ====================================================================
+//  【第三层后置】把所有 Mixin 类加回 KBox 输出
+// ====================================================================
+task restoreMixins(type: Zip) {
+    dependsOn kboxObfuscate, j2ccNative
+
+    def kboxOutput = file("${buildDir}/kbox/output-kbox.jar")
+    def nativeJar  = file("${buildDir}/libs/${project.name}-native.jar")
+
+    archiveFileName = "${project.name}-kbox.jar"
+    destinationDirectory = file("${buildDir}/libs")
+
+    // 1. KBox 处理过的所有类（不含 Mixin）
+    from zipTree(kboxOutput)
+
+    // 2. 原始 Mixin 类（从 native.jar 里提取，未经 KBox）
+    from(zipTree(nativeJar)) {
+        include "dev/Astra/asm/mixins/**"
+    }
+
+    doFirst {
+        println "=================================================="
+        println " Restore ALL Mixins into KBox output"
+        println "=================================================="
+    }
+}
+
+// ====================================================================
+//  最终打包：三层混淆链
+//  执行：gradlew buildProtectedJar
+// ====================================================================
+task buildProtectedJar(type: Copy) {
+    dependsOn clean, restoreMixins
+
+    def kboxJar  = file("${buildDir}/libs/${project.name}-kbox.jar")
+    def finalDir = file("${buildDir}/libs/protected")
+
+    from kboxJar
     into finalDir
-    rename { "${project.name}-protected-${project.version}.jar" }
+    rename { "${project.name}-obf.jar" }
 
     doLast {
         println "==================================================="
-        println " Protected jar: ${finalDir}/${project.name}-protected-${project.version}.jar"
+        println " Triple-Layer Protected jar:"
+        println "  ${finalDir}/${project.name}-obf.jar"
+        println "==================================================="
+        println " Layer 1: ProGuard (name obfuscation)"
+        println " Layer 2: J2CC    (native compilation)"
+        println " Layer 3: KBox    (control flow + string encryption)"
+        println "==================================================="
+    }
+}
+
+// ====================================================================
+//  【移动端】J2CC 原生编译（Android/PojavLauncher）
+//  需要临时替换 JNI 头文件为 Linux 版本（__stdcall 在 ARM64 上无效）
+// ====================================================================
+task j2ccNativeMobile(type: Exec) {
+    dependsOn proguardObfuscate
+
+    def j2ccJar    = file("tools/j2cc.jar")
+    def inputJar   = file("${buildDir}/libs/${project.name}-proguard.jar")
+    def outputJar  = file("${buildDir}/libs/${project.name}-native-mobile.jar")
+    def configFile = file("${buildDir}/j2cc-config-mobile.toml")
+    def nativesDir = file("tools/natives")
+    def zigDir     = file("tools/zig_compiler")
+
+    def minecraftLibs = configurations.findByName('minecraftLibraries')
+    def compileLibs   = configurations.compileClasspath
+
+    def win32JniMd = file(project.jdkHome + "/include/win32/jni_md.h")
+    def jniMdBackup = file("${buildDir}/jni_md_win32.backup")
+
+    doFirst {
+        if (!j2ccJar.exists())
+            throw new GradleException("J2CC jar not found: ${j2ccJar.absolutePath}")
+        if (!inputJar.exists())
+            throw new GradleException("ProGuard output not found: ${inputJar.absolutePath}")
+        if (!new File(nativesDir, "nativeUtils.dll").exists())
+            throw new GradleException("nativeUtils.dll not found in ${nativesDir.absolutePath}")
+
+        outputJar.parentFile.mkdirs()
+        configFile.parentFile.mkdirs()
+
+        if (win32JniMd.exists()) {
+            // 备份原始文件
+            jniMdBackup.bytes = win32JniMd.bytes
+            // 替换为 Linux 版本（__stdcall → 空宏，__declspec → visibility）
+            def linuxContent = '''/*
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
+ */
+
+#ifndef _JAVASOFT_JNI_MD_H_
+#define _JAVASOFT_JNI_MD_H_
+
+#define JNIEXPORT __attribute__((visibility("default")))
+#define JNIIMPORT __attribute__((visibility("default")))
+#define JNICALL
+
+typedef int jint;
+#ifdef _LP64
+typedef long jlong;
+#else
+typedef long long jlong;
+#endif
+typedef signed char jbyte;
+
+#endif
+'''
+            win32JniMd.text = linuxContent
+            println "[Mobile] Patched win32/jni_md.h → Linux ABI for ARM64 cross-compile"
+        }
+
+        def libPaths = new LinkedHashSet<String>()
+
+        def loomCacheDir = new File(gradle.gradleUserHomeDir, "caches/fabric-loom")
+        if (loomCacheDir.exists()) {
+            def mcJars = fileTree(loomCacheDir) {
+                include "**/minecraft-merged-*-1.21.1*.jar"
+                include "**/minecraft-merged-1.21.1*.jar"
+                exclude "**/*-sources.jar"
+                exclude "**/*-javadoc.jar"
+                exclude "**/*-dev.jar"
+                exclude "**/*-mappings*.jar"
+            }.files
+
+            mcJars.each { jarFile ->
+                libPaths.add(jarFile.absolutePath.replace('\\', '/'))
+            }
+            println "Added ${mcJars.size()} MC 1.21.1 jars from Loom cache"
+
+            def otherJars = fileTree(loomCacheDir) {
+                include "**/*.jar"
+                exclude "**/minecraft-merged-*.jar"
+                exclude "**/*-sources.jar"
+                exclude "**/*-javadoc.jar"
+                exclude "**/*-dev.jar"
+                exclude "**/*-mappings*.jar"
+            }.files
+
+            otherJars.each { jarFile ->
+                libPaths.add(jarFile.absolutePath.replace('\\', '/'))
+            }
+            println "Added ${otherJars.size()} other jars from Loom cache"
+        }
+
+        if (minecraftLibs != null) {
+            minecraftLibs.each { lib ->
+                if (lib.name.endsWith('.jar') && lib.exists()) {
+                    libPaths.add(lib.absolutePath.replace('\\', '/'))
+                }
+            }
+        }
+        compileLibs.each { lib ->
+            if (lib.name.endsWith('.jar') && lib.exists()) {
+                libPaths.add(lib.absolutePath.replace('\\', '/'))
+            }
+        }
+
+        def libsToml = libPaths.collect { "\"${it}\"" }.join(",\n        ")
+
+        def config = """# AUTOGENERATED by Gradle - Mobile
+
+skipOptimizations = false
+compileClasses = []
+postCompileScripts = []
+parallelJobs = 1
+targets = ["aarch64-linux-musl"]
+compilerType = "ZIG"
+keepTempDirectory = false
+compileAllMethods = false
+zigArgs = ["-fsigned-char", "-ffast-math", "-fno-math-errno"]
+vagueExceptions = false
+
+[debugSettings]
+printMethodLink = false
+printMethodEntryExit = false
+verboseLoader = false
+printMethodCalls = false
+dumpTranspilees = false
+verboseRuntime = false
+printBytecode = false
+
+[paths]
+inputPath = "${inputJar.absolutePath.replace('\\', '/')}"
+outputPath = "${outputJar.absolutePath.replace('\\', '/')}"
+tempPath = "${file("${buildDir}/j2cc-temp-mobile").absolutePath.replace('\\', '/')}"
+utilPath = "${nativesDir.absolutePath.replace('\\', '/')}"
+zigPath = "${zigDir.absolutePath.replace('\\', '/')}"
+libraries = [
+        ${libsToml}
+]
+"""
+        configFile.text = config
+
+        println "J2CC Mobile config written to: ${configFile.absolutePath}"
+        println "Total libraries: ${libPaths.size()}"
+    }
+
+    workingDir = nativesDir
+
+    commandLine "${project.jdkHome}/bin/java",
+            '-Xms256m',
+            '-Xmx2g',
+            '-XX:MaxMetaspaceSize=512m',
+            '-jar', j2ccJar.absolutePath,
+            'obfuscate', configFile.absolutePath
+
+    doLast {
+        if (jniMdBackup.exists() && win32JniMd.exists()) {
+            win32JniMd.bytes = jniMdBackup.bytes
+            jniMdBackup.delete()
+            println "[Mobile] Restored win32/jni_md.h from backup"
+        }
+    }
+}
+
+// ====================================================================
+//  【移动端·第三层前置】剥离 Mixin 类
+// ====================================================================
+task stripMixinsMobile(type: Zip) {
+    dependsOn j2ccNativeMobile
+
+    def inputJar  = file("${buildDir}/libs/${project.name}-native-mobile.jar")
+    def outputDir = file("${buildDir}/kbox-mobile")
+
+    archiveFileName = "input-stripped.jar"
+    destinationDirectory = outputDir
+
+    from zipTree(inputJar)
+
+    exclude "dev/Astra/asm/mixins/**"
+
+    doFirst {
+        outputDir.mkdirs()
+        println "=================================================="
+        println " [Mobile] Strip ALL Mixins from KBox input"
+        println "  Input:  ${inputJar.absolutePath}"
+        println "  Output: ${outputDir}/input-stripped.jar"
+        println "=================================================="
+    }
+}
+
+// ====================================================================
+//  【移动端·第三层】KBox 控制流混淆 + 字符串加密
+// ====================================================================
+task kboxObfuscateMobile(type: Exec) {
+    dependsOn stripMixinsMobile
+
+    def kboxJar     = file("tools/kbox-protector.jar")
+    def inputJar    = file("${buildDir}/kbox-mobile/input-stripped.jar")
+    def outputJar   = file("${buildDir}/kbox-mobile/output-kbox.jar")
+    def mappingFile = file("${buildDir}/kbox-mobile/mapping.txt")
+    def logFile     = file("${buildDir}/kbox-mobile/kbox.log")
+    def configFile  = file("kbox-config.conf")
+
+    doFirst {
+        if (!kboxJar.exists())
+            throw new GradleException("KBox jar not found: ${kboxJar.absolutePath}")
+        if (!inputJar.exists())
+            throw new GradleException("Stripped input jar not found: ${inputJar.absolutePath}")
+
+        outputJar.parentFile.mkdirs()
+        mappingFile.parentFile.mkdirs()
+        logFile.parentFile.mkdirs()
+
+        println "=================================================="
+        println " [Mobile] KBox Obfuscation (Layer 3)"
+        println "  Input:  ${inputJar.absolutePath}"
+        println "  Output: ${outputJar.absolutePath}"
+        println "  Log:    ${logFile.absolutePath}"
+        println "=================================================="
+    }
+
+    commandLine "${project.jdkHome}/bin/java", '-jar', kboxJar.absolutePath,
+            '--input',  inputJar.absolutePath,
+            '--output', outputJar.absolutePath,
+            '--mapping', mappingFile.absolutePath,
+            '--config', configFile.absolutePath,
+            '--mc-preset', 'MIXIN',
+            '-dontobfuscate',
+            '-keep', '@j2cc.Nativeify',
+            '-neverfail', 'true',
+            '--verbose',
+            '--log', logFile.absolutePath
+}
+
+// ====================================================================
+//  【移动端·第三层后置】恢复 Mixin 类
+// ====================================================================
+task restoreMixinsMobile(type: Zip) {
+    dependsOn kboxObfuscateMobile, j2ccNativeMobile
+
+    def kboxOutput = file("${buildDir}/kbox-mobile/output-kbox.jar")
+    def nativeJar  = file("${buildDir}/libs/${project.name}-native-mobile.jar")
+
+    archiveFileName = "${project.name}-kbox-mobile.jar"
+    destinationDirectory = file("${buildDir}/libs")
+
+    from zipTree(kboxOutput)
+
+    from(zipTree(nativeJar)) {
+        include "dev/Astra/asm/mixins/**"
+    }
+
+    doFirst {
+        println "=================================================="
+        println " [Mobile] Restore ALL Mixins into KBox output"
+        println "=================================================="
+    }
+}
+
+// ====================================================================
+//  移动端最终打包
+//  执行：gradlew buildMobileProtectedJar
+// ====================================================================
+task buildMobileProtectedJar(type: Copy) {
+    dependsOn clean, restoreMixinsMobile
+
+    def kboxJar  = file("${buildDir}/libs/${project.name}-kbox-mobile.jar")
+    def finalDir = file("${buildDir}/libs/protected")
+
+    from kboxJar
+    into finalDir
+    rename { "${project.name}-obf-mobile.jar" }
+
+    doLast {
+        println "==================================================="
+        println " Triple-Layer Protected jar (Mobile):"
+        println "  ${finalDir}/${project.name}-obf-mobile.jar"
+        println "==================================================="
+        println " Layer 1: ProGuard (name obfuscation)"
+        println " Layer 2: J2CC    (native → aarch64-linux-musl)"
+        println " Layer 3: KBox    (control flow + string encryption)"
+        println "==================================================="
+    }
+}
+
+// ====================================================================
+//  同时构建桌面端 + 移动端
+//  执行：gradlew buildAllProtectedJars
+// ====================================================================
+task buildAllProtectedJars {
+    dependsOn buildProtectedJar, buildMobileProtectedJar
+
+    doLast {
+        def finalDir = file("${buildDir}/libs/protected")
+        println ""
+        println "==================================================="
+        println " All platforms built successfully!"
+        println "  Windows: ${finalDir}/${project.name}-obf.jar"
+        println "  Android: ${finalDir}/${project.name}-obf-mobile.jar"
         println "==================================================="
     }
 }

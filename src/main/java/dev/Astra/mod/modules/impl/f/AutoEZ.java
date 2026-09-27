@@ -58,7 +58,7 @@ public class AutoEZ extends Module {
             "呼呼~哥哥的技术和你的名字一样可爱呢♡",
             "呐呐~哥哥再练一百年也打不过咱哦♡"
     );
-    //XD deepseek还会写这些xswlhhh(ShYin
+    //XD deepseek还会写这些xswl(ShYin
     public final List<String> bot = List.of(
             "鼠标明天到，触摸板打的",
             "转人工",

@@ -1,0 +1,32 @@
+========================================
+This is Astra Client-Enhanced
+ - 这里是Astra-Enhanced客户端
+========================================
+
+If you are seeing this file, it means you have opened the jar package.
+You should also have noticed: all implementations of the core methods are not here.
+ - 如果你看到了这个文件，说明你已经打开了 jar 包
+ - 那么你应该也发现：所有核心方法的实现都不在这里
+
+They have been transpiled into x86 machine code and stored in native libraries.
+All string constants are encrypted with AES-256.
+The control flow is obfuscated with opaque predicates.
+ - 它们已经被转译成了 x86 机器码，存储在 native 库中
+ - 字符串常量全部经过 AES-256 加密
+ - 控制流被不透明谓词打乱
+
+Continuing to reverse engineer will only waste your time.
+If you really need this code, please contact the author to purchase a license.
+ - 继续逆向下去只会浪费你的时间
+ - 如果你真的需要这些代码，请联系作者购买授权
+
+ - Confused by ShYin
+ - ShYin1337@outlook.com
+ - Confused in 2026O926-15:36:30
+
+ Developer:
+ - g255
+ - EJQ
+ - ShYin
+
+========================================

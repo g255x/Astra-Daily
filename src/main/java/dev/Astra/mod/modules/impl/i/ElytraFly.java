@@ -141,6 +141,8 @@ public class ElytraFly extends Module {
         }
     }
 
+    // ✅ 加 @Nativeify
+    @Nativeify
     public static boolean recastElytra(ClientPlayerEntity player) {
         if (ElytraFly.checkConditions(player) && ElytraFly.ignoreGround(player)) {
             player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
@@ -152,11 +154,19 @@ public class ElytraFly extends Module {
         return false;
     }
 
+    // ✅ 加 @Nativeify
+    @Nativeify
     public static boolean checkConditions(ClientPlayerEntity player) {
         ItemStack itemStack = player.getEquippedStack(EquipmentSlot.CHEST);
-        return !player.getAbilities().flying && !player.hasVehicle() && !player.isClimbing() && itemStack.isOf(Items.ELYTRA) && ElytraItem.isUsable(itemStack);
+        return !player.getAbilities().flying
+                && !player.hasVehicle()
+                && !player.isClimbing()
+                && itemStack.isOf(Items.ELYTRA)
+                && ElytraItem.isUsable(itemStack);
     }
 
+    // ✅ 加 @Nativeify
+    @Nativeify
     private static boolean ignoreGround(ClientPlayerEntity player) {
         if (!player.isTouchingWater() && !player.hasStatusEffect(StatusEffects.LEVITATION)) {
             ItemStack itemStack = player.getEquippedStack(EquipmentSlot.CHEST);
@@ -195,7 +205,8 @@ public class ElytraFly extends Module {
         Astra.EVENT_BUS.unsubscribe(this.fireWorkTweak);
     }
 
-    // ⚠️ 调 mc.player.addVelocity，不加
+    // ✅ 加 @Nativeify
+    @Nativeify
     private void boost() {
         if (this.hasElytra) {
             if (!this.isFallFlying()) {
@@ -203,7 +214,10 @@ public class ElytraFly extends Module {
             }
             float yaw = (float) Math.toRadians(ElytraFly.mc.player.getYaw());
             if (ElytraFly.mc.options.forwardKey.isPressed()) {
-                ElytraFly.mc.player.addVelocity(-MathHelper.sin(yaw) * this.boost.getValueFloat() / 10.0f, 0.0, MathHelper.cos(yaw) * this.boost.getValueFloat() / 10.0f);
+                ElytraFly.mc.player.addVelocity(
+                        -MathHelper.sin(yaw) * this.boost.getValueFloat() / 10.0f,
+                        0.0,
+                        MathHelper.cos(yaw) * this.boost.getValueFloat() / 10.0f);
             }
         }
     }
@@ -234,10 +248,8 @@ public class ElytraFly extends Module {
         }
         if (this.mode.is(Mode.Rotation)) {
             if (this.isFallFlying()) {
-                // ===== 用 calculateRotationPitch() 替代原来的大段 if-else =====
                 float newPitch = this.calculateRotationPitch();
 
-                // motionStop 副作用
                 if (this.motionStop.getValue() && !MovementUtil.isMoving()
                         && !ElytraFly.mc.options.jumpKey.isPressed()
                         && !ElytraFly.mc.options.sneakKey.isPressed()) {
@@ -246,7 +258,10 @@ public class ElytraFly extends Module {
 
                 this.rotationPitch = newPitch;
 
-                if (ElytraFly.mc.options.forwardKey.isPressed() || ElytraFly.mc.options.backKey.isPressed() || ElytraFly.mc.options.leftKey.isPressed() || ElytraFly.mc.options.rightKey.isPressed()) {
+                if (ElytraFly.mc.options.forwardKey.isPressed()
+                        || ElytraFly.mc.options.backKey.isPressed()
+                        || ElytraFly.mc.options.leftKey.isPressed()
+                        || ElytraFly.mc.options.rightKey.isPressed()) {
                     this.yaw = Sprint.getSprintYaw(ElytraFly.mc.player.getYaw());
                 } else if (this.motionStop.getValue()) {
                     this.setX(0.0);
@@ -284,7 +299,6 @@ public class ElytraFly extends Module {
             }
         }
 
-        // ===== 用 calculatePlayerSpeed() 替代内联计算 =====
         double speed = this.calculatePlayerSpeed();
 
         if (this.mode.getValue() == Mode.Boost) {
@@ -417,7 +431,10 @@ public class ElytraFly extends Module {
         if (ElytraFly.nullCheck()) {
             return;
         }
-        if (this.mode.is(Mode.Bounce) && this.hasElytra && event.getPacket() instanceof ClientCommandC2SPacket && ((ClientCommandC2SPacket) event.getPacket()).getMode().equals(ClientCommandC2SPacket.Mode.START_FALL_FLYING) && !this.sprint.getValue()) {
+        if (this.mode.is(Mode.Bounce) && this.hasElytra
+                && event.getPacket() instanceof ClientCommandC2SPacket
+                && ((ClientCommandC2SPacket) event.getPacket()).getMode().equals(ClientCommandC2SPacket.Mode.START_FALL_FLYING)
+                && !this.sprint.getValue()) {
             ElytraFly.mc.player.setSprinting(true);
         }
     }
@@ -468,7 +485,10 @@ public class ElytraFly extends Module {
         if (ElytraFly.nullCheck() || !this.hasElytra || !this.isFallFlying() || event.isPost()) {
             return;
         }
-        if ((this.mode.is(Mode.Freeze) || this.mode.is(Mode.Rotation) && this.freeze.getValue()) && !MovementUtil.isMoving() && !ElytraFly.mc.options.jumpKey.isPressed() && !ElytraFly.mc.options.sneakKey.isPressed()) {
+        if ((this.mode.is(Mode.Freeze) || this.mode.is(Mode.Rotation) && this.freeze.getValue())
+                && !MovementUtil.isMoving()
+                && !ElytraFly.mc.options.jumpKey.isPressed()
+                && !ElytraFly.mc.options.sneakKey.isPressed()) {
             event.cancel();
             return;
         }
@@ -493,7 +513,6 @@ public class ElytraFly extends Module {
                 double lookDist = Math.sqrt(lookVec.x * lookVec.x + lookVec.z * lookVec.z);
                 double motionDist = Math.sqrt(this.getX() * this.getX() + this.getZ() * this.getZ());
 
-                // ===== 用 calculateFlyMotion() 替代原来的大段内联 =====
                 Vec3d newMotion = this.calculateFlyMotion(lookVec, motionDist, lookDist);
                 this.setX(newMotion.x);
                 this.setY(newMotion.y);
@@ -514,14 +533,12 @@ public class ElytraFly extends Module {
         boolean jumping = ElytraFly.mc.player.input.jumping;
         boolean sneaking = ElytraFly.mc.player.input.sneaking;
 
-        // 1. 潜行/下落
         if (sneaking) {
             motionY = -this.sneakDownSpeed.getValue();
         } else if (!jumping) {
             motionY = -3.0E-11 * this.downFactor.getValue();
         }
 
-        // 2. 起跳 / 加速度
         if (jumping) {
             if (motionDist > this.upFactor.getValue() / this.upFactor.getMax()) {
                 double rawUpSpeed = motionDist * 0.01325;
@@ -535,27 +552,23 @@ public class ElytraFly extends Module {
             }
         }
 
-        // 3. 朝视线方向对齐
         if (lookDist > 0.0) {
             motionX = motionX + (lookVec.x / lookDist * motionDist - motionX) * 0.1;
             motionZ = motionZ + (lookVec.z / lookDist * motionDist - motionZ) * 0.1;
         }
 
-        // 4. 非跳跃 → speed 方向
         if (!jumping) {
             double[] dir = MovementUtil.directionSpeed(this.speed.getValue());
             motionX = dir[0];
             motionZ = dir[1];
         }
 
-        // 5. 阻力
         if (!this.noDrag.getValue()) {
             motionY *= 0.99;
             motionX *= 0.98;
             motionZ *= 0.99;
         }
 
-        // 6. 速度上限
         double finalDist = Math.sqrt(motionX * motionX + motionZ * motionZ);
         if (this.speedLimit.getValue() && finalDist > this.maxSpeed.getValue()) {
             motionX = motionX * this.maxSpeed.getValue() / finalDist;
@@ -604,7 +617,9 @@ public class ElytraFly extends Module {
     @Nativeify
     private void getInfinitePitch() {
         this.lastInfinitePitch = this.infinitePitch;
-        double currentPlayerSpeed = Math.hypot(ElytraFly.mc.player.getX() - ElytraFly.mc.player.prevX, ElytraFly.mc.player.getZ() - ElytraFly.mc.player.prevZ);
+        double currentPlayerSpeed = Math.hypot(
+                ElytraFly.mc.player.getX() - ElytraFly.mc.player.prevX,
+                ElytraFly.mc.player.getZ() - ElytraFly.mc.player.prevZ);
         if (ElytraFly.mc.player.getY() < this.infiniteMaxHeight.getValue()) {
             if (currentPlayerSpeed * 72.0 < this.infiniteMinSpeed.getValue() && !this.down) {
                 this.down = true;
@@ -619,9 +634,12 @@ public class ElytraFly extends Module {
         this.infinitePitch = MathUtil.clamp(this.infinitePitch, -40.0f, 40.0f);
     }
 
-    // ⚠️ 高频调用，且调 mc.player，风险大，不加
+    // ✅ 加 @Nativeify
+    @Nativeify
     public boolean isFallFlying() {
-        return ElytraFly.mc.player.isFallFlying() || this.packet.getValue() && this.hasElytra && !ElytraFly.mc.player.isOnGround() || this.flying;
+        return ElytraFly.mc.player.isFallFlying()
+                || this.packet.getValue() && this.hasElytra && !ElytraFly.mc.player.isOnGround()
+                || this.flying;
     }
 
     public enum Mode {
@@ -647,7 +665,10 @@ public class ElytraFly extends Module {
             }
             if (Wrapper.mc.currentScreen == null) {
                 if (ElytraFly.this.fireWork.isPressed()) {
-                    if (!(this.press || !ElytraFly.this.fireworkTimer.passed(ElytraFly.this.delay.getValueInt()) || mc.player.isUsingItem() && ElytraFly.this.usingPause.getValue() || !ElytraFly.this.isFallFlying())) {
+                    if (!(this.press
+                            || !ElytraFly.this.fireworkTimer.passed(ElytraFly.this.delay.getValueInt())
+                            || mc.player.isUsingItem() && ElytraFly.this.usingPause.getValue()
+                            || !ElytraFly.this.isFallFlying())) {
                         ElytraFly.this.off();
                         ElytraFly.this.fireworkTimer.reset();
                     }

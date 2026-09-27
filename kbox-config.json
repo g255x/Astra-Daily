@@ -1,22 +1,26 @@
 {
   "rename": false,
   "stringEncryption": true,
-  "stringEncryptionStrength": 3,
+  "stringEncryptionStrength": 2,
   "controlFlowFlattening": true,
-  "flattenerLevel": 3,
-  "flattenerMinInsns": 16,
-  "flattenerMaxInsns": 256,
+  "flattenerLevel": 1,
+  "flattenerMinInsns": 32,
+  "flattenerMaxInsns": 128,
   "antiDecompiler": true,
-  "antiDecompilerLevel": 3,
+  "antiDecompilerLevel": 2,
   "vmp": false,
   "jnic": false,
   "resourceObfuscation": false,
   "keepClasses": [
-    "dev.Astra.asm.mixins.**",
-    "dev.luminous.asm.mixins.**",
-    "dev.Astra.api.events.**",
-    "dev.luminous.api.events.**",
-    "dev.Astra.mod.modules.**",
-    "dev.luminous.mod.modules.**"
+    "dev/Astra/asm/mixins/**",
+    "dev/Astra/asm/accessors/**",
+    "dev/Astra/asm/**",
+    "dev/Astra/api/events/**",
+    "dev/Astra/mod/gui/**",
+    "dev/Astra/mod/modules/impl/combat/**",
+    "dev/Astra/mod/modules/impl/movement/**",
+    "dev/Astra/mod/modules/impl/player/**",
+    "dev/Astra/api/utils/math/**",
+    "j2cc/**"
   ]
 }

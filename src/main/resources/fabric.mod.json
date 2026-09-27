@@ -3,7 +3,7 @@
   "id": "astra",
   "version": "${version}",
   "name": "Astra Client",
-  "description": "Astra Client(_Kushen_写的公益客户端，如果你是付费获取的，那么你被骗了)",
+  "description": "Astra Client-Enhanced",
   "authors": [
     "_Kushen_"
   ],
